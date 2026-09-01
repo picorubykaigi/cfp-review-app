@@ -21,10 +21,6 @@ class Proposals
   def each = @list.each { |proposal| yield proposal }
   def each_with_index = @list.each_with_index { |proposal, index| yield proposal, index }
 
-  def without(email)
-    Proposals.new(@list.select { |proposal| proposal.email.downcase != email.downcase })
-  end
-
   def matching(speaker, title, format)
     Proposals.new(@list.select do |proposal|
       matches?(proposal.name, speaker) &&

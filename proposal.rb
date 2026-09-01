@@ -38,4 +38,6 @@ class Proposal
   def format_label = (talk? ? 'Talk' : 'Showcase')
 
   def talk? = @format == TALK
+
+  def submitted_by?(email) = @email.downcase == email.downcase
 end

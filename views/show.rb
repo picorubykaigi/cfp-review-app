@@ -39,7 +39,7 @@ module Show
         ''
       end
 
-      render_rating(proposal)
+      render_rating(proposal) unless own?(proposal)
       render_others(proposal)
     end
   end
@@ -79,30 +79,34 @@ module Show
     end
   end
 
+  def own?(proposal) = proposal.submitted_by?(@session.email)
+
   def render_others(proposal)
     div(class: 'others') do
-      if @ratings.rated?(proposal.row)
-        entries = @ratings.entries(proposal.row)
-        rating_count = @ratings.count(proposal.row)
-        if rating_count == 0
-          div(class: 'others-none') { 'No Ratings' }
-        else
-          div(class: 'others-head') do
-            "Average rating: #{@ratings.average_text(proposal.row)} (#{rating_count})"
-          end
-          entries.each do |who, value|
-            div(class: 'others-row') do
-              span(class: 'others-who') { short_name(who) }
-              span(class: 'others-score') { value[0] }
-              span(class: 'others-comment') { value[1] }
-            end
-          end
-          ''
-        end
+      if own?(proposal) || @ratings.rated?(proposal.row)
+        render_rating_list(proposal)
       else
         div(class: 'others-none') { 'Ratings are shown once you save your own.' }
       end
     end
+  end
+
+  # 自分のプロポーザルでは点数だけ見せ、コメントは伏せる。
+  def render_rating_list(proposal)
+    rating_count = @ratings.count(proposal.row)
+    return div(class: 'others-none') { 'No Ratings' } if rating_count == 0
+
+    div(class: 'others-head') do
+      "Average rating: #{@ratings.average_text(proposal.row)} (#{rating_count})"
+    end
+    @ratings.entries(proposal.row).each do |who, value|
+      div(class: 'others-row') do
+        span(class: 'others-who') { short_name(who) }
+        span(class: 'others-score') { value[0] }
+        span(class: 'others-comment') { own?(proposal) ? '' : value[1] }
+      end
+    end
+    ''
   end
 
   def short_name(email)
