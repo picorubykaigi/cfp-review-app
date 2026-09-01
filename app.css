@@ -257,17 +257,14 @@ td.c-format { white-space: nowrap; font-size: var(--font-size-small); color: var
 .rate-row { display: flex; align-items: center; gap: .1rem; margin-bottom: .75rem; }
 .rate-label { font-size: var(--font-size-small); color: var(--gray); margin-right: .6rem; }
 
-.star {
-  border: none;
-  background: none;
-  font-size: 20px;
-  line-height: 1;
-  padding: 0 2px;
-  color: var(--brand-gray);
-  cursor: pointer;
+.rate-score {
+  width: 5rem;
+  font: inherit;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius-base);
+  text-align: center;
 }
-.star.on { color: var(--bright-blue); }
-.rate-row:hover .star.on { color: var(--green); }
 
 .rate-comment {
   width: 100%;
@@ -303,28 +300,6 @@ td.c-format { white-space: nowrap; font-size: var(--font-size-small); color: var
   .bar { flex-wrap: wrap; }
 }
 
-.guide-btn {
-  border: none;
-  background: none;
-  color: var(--bright-blue);
-  font-size: var(--font-size-large);
-  cursor: pointer;
-  padding: 0 0 0 .5rem;
-  line-height: 1;
-}
-
-.guide {
-  background: var(--white);
-  border: 1px solid var(--legend-border-color);
-  border-radius: var(--border-radius-base);
-  padding: .75rem .9rem;
-  margin-bottom: .75rem;
-  font-size: var(--font-size-small);
-}
-.guide-head { font-weight: 700; margin-bottom: .4rem; }
-.guide-row { display: flex; gap: .6rem; align-items: baseline; }
-.guide-score { color: var(--bright-blue); font-weight: 700; width: 1em; }
-.guide-text { color: var(--gray); }
 
 .others { margin-top: 1.25rem; }
 .others-head {

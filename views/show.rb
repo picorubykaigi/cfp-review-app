@@ -1,13 +1,4 @@
 module Show
-  # cfp-app の rating_tooltip（Ratings Guide）に相当する説明。
-  GUIDE = [
-    ['1', '問題が多く、このイベントには合わない'],
-    ['2', '平凡。手を入れれば合うかもしれない'],
-    ['3', 'よい。改善の余地はあるが、イベントには適している'],
-    ['4', 'とてもよい。主題も合っていて、全体としてふさわしい'],
-    ['5', '理想的。文句なくふさわしい提案']
-  ].freeze
-
   def render_detail
     proposal = current
     return render_list if proposal.nil?
@@ -73,15 +64,8 @@ module Show
     div(class: 'rate') do
       div(class: 'rate-row') do
         div(class: 'rate-label') { 'Rating' }
-        now = state.score.to_s.to_i
-        ['1', '2', '3', '4', '5'].each do |value|
-          button(class: now >= value.to_i ? 'star on' : 'star',
-                 onclick: ->(*_a) { set_score(value) }) { '★' }
-        end
-        button(class: 'guide-btn', onclick: :toggle_guide) { 'ⓘ' }
-      end
-      if state.guide
-        render_guide
+        input(type: 'number', class: 'rate-score', min: '1', max: '5', step: '0.1',
+              oninput: :on_score_input)
       end
       textarea(class: 'rate-comment', placeholder: 'Comment (optional)') { '' }
       div(class: 'rate-foot') do
@@ -92,19 +76,6 @@ module Show
           @ratings.rated?(proposal.row) ? 'Saving again replaces your rating.' : ''
         end
       end
-    end
-  end
-
-  def render_guide
-    div(class: 'guide') do
-      div(class: 'guide-head') { 'Ratings Guide' }
-      GUIDE.each do |guide|
-        div(class: 'guide-row') do
-          span(class: 'guide-score') { guide[0] }
-          span(class: 'guide-text') { guide[1] }
-        end
-      end
-      ''
     end
   end
 

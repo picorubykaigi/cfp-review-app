@@ -54,7 +54,7 @@ class Ratings
     found = @by_row[row]
     return [] if found.nil?
 
-    found.values.map { |value| value[0].to_i }.reject { |score| score == 0 }
+    found.values.map { |value| value[0].to_f }.reject { |score| score <= 0 }
   end
 
   def to_text(value) = (value == UNRATED ? '' : value.round(1).to_s)

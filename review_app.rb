@@ -16,7 +16,7 @@ class ReviewApp < Funicular::Component
     @history = ScreenHistory.new
     @table = TableState.new(local_storage)
     { phase: 'signin', message: '', index: 0,
-      score: '', busy: false, toast: '', guide: false, table_revision: 0 }
+      score: '', busy: false, toast: '', table_revision: 0 }
   end
 
   def component_mounted
@@ -45,6 +45,8 @@ class ReviewApp < Funicular::Component
     @synced_row = proposal.row
     rating = @ratings.mine(proposal.row)
     element[:value] = rating.nil? ? '' : rating[1]
+    score = score_el
+    score[:value] = rating.nil? ? '' : rating[0] unless score.nil?
   end
 
   def sign_in(*_a)
@@ -131,16 +133,16 @@ class ReviewApp < Funicular::Component
     element.nil? ? '' : element[:value].to_s
   end
 
-  def set_score(value) = patch(score: value)
-  def toggle_guide(*_a) = patch(guide: !state.guide)
+  def on_score_input(*_a) = patch(score: score_value)
   def save_rating(*_a) = guard('保存') { do_save }
 
   def do_save
     proposal = current
     return if proposal.nil? || state.busy
 
-    if state.score.to_s.empty?
-      flash('Please choose a rating.')
+    score = state.score.to_s.to_f
+    if score < 1 || score > 5
+      flash('Rating must be between 1 and 5.')
       return
     end
 
@@ -148,11 +150,11 @@ class ReviewApp < Funicular::Component
     patch(busy: true, toast: '')
     status, body = SheetsClient.append(
       @session.token, @config.sheet_id, RATINGS,
-      [JS.global.cfpNow.to_s, @session.email, proposal.row.to_s, state.score.to_s, comment]
+      [JS.global.cfpNow.to_s, @session.email, proposal.row.to_s, score.to_s, comment]
     )
     patch(busy: false)
     if status == 200
-      @ratings.record(proposal.row, @session.email, state.score.to_s, comment)
+      @ratings.record(proposal.row, @session.email, score.to_s, comment)
       flash('保存しました')
     else
       hint = status == 400 ? '「Ratings」タブが無いかもしれません。' : ''
@@ -161,6 +163,12 @@ class ReviewApp < Funicular::Component
   end
 
   def comment_el = JS.document.querySelector('.rate-comment')
+  def score_el = JS.document.querySelector('.rate-score')
+
+  def score_value
+    element = score_el
+    element.nil? ? '' : element[:value].to_s
+  end
 
   def comment_value
     element = comment_el
@@ -195,7 +203,7 @@ class ReviewApp < Funicular::Component
 
   def return_to(phase)
     @synced_row = nil
-    patch(phase: phase, toast: '', guide: false)
+    patch(phase: phase, toast: '')
   end
 
   def local_storage = JS.global[:localStorage]
