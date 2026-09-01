@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>[dev] CFP Review App（テストデータ）</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap">
+    <link rel="stylesheet" href="app.css">
+    <style>body::before{content:'DEV / テストデータ';position:fixed;right:0;top:0;z-index:9;
+    background:#b3452b;color:#fff;font-size:11px;padding:2px 8px}</style>
+  </head>
+  <body>
+    <div id="app"><div class="boot">読み込み中…</div></div>
+
+    <script src="config.js"></script>
+    <script src="bridge.js"></script>
+    <script>
+      window.CFP_CLIENT_ID = 'dev';
+      window.cfpSignIn = function (callback) { callback('dev-token'); };
+    </script>
+
+    <script>
+      (function () {
+        var files = [
+      'sheets_client.rb',
+      'proposal.rb',
+      'proposals.rb',
+      'ratings.rb',
+      'session.rb',
+      'sheet_config.rb',
+      'screen_history.rb',
+      'table_state.rb',
+      'mock_sheets_client.rb',
+      'views/signin.rb',
+      'views/index.rb',
+      'views/show.rb',
+      'review_app.rb'
+    ];
+        var here = document.currentScript;
+        var stamp = Date.now();
+        files.forEach(function (f) {
+          var s = document.createElement('script');
+          s.type = 'text/ruby';
+          s.src = f + '?t=' + stamp;
+          here.parentNode.insertBefore(s, here);
+        });
+      })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@picoruby/wasm-wasi@4.0.0/dist/init.iife.js"></script>
+  </body>
+</html>
