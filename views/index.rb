@@ -46,11 +46,14 @@ module Index
 
   def render_row(proposal, index)
     rating_count = @ratings.count(proposal.row)
+    scores_visible = @ratings.rated?(proposal.row) || own?(proposal)
     tr(class: index == state.index ? 'proposal sel' : 'proposal',
        onclick: ->(*_a) { open_at(index) }) do
-      td(class: 'c-num') { @ratings.average_text(proposal.row) }
+      td(class: 'c-num') { scores_visible ? @ratings.average_text(proposal.row) : '' }
       td(class: 'c-num') { rating_count == 0 ? '' : rating_count.to_s }
-      td(class: 'c-num') { @ratings.standard_deviation_text(proposal.row) }
+      td(class: 'c-num') do
+        scores_visible ? @ratings.standard_deviation_text(proposal.row) : ''
+      end
       td(class: 'c-speaker') { proposal.name }
       td(class: 'c-title') { proposal.title }
       td(class: 'c-format') { proposal.format_label }

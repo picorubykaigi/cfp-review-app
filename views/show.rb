@@ -79,8 +79,6 @@ module Show
     end
   end
 
-  def own?(proposal) = proposal.submitted_by?(@session.email)
-
   def render_others(proposal)
     div(class: 'others') do
       if own?(proposal) || @ratings.rated?(proposal.row)

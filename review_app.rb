@@ -99,6 +99,7 @@ class ReviewApp < Funicular::Component
   def fail_with(message) = patch(phase: 'error', busy: false, message: message)
   def visible_proposals = @table.apply(@proposals, @ratings)
   def current = visible_proposals[state.index]
+  def own?(proposal) = proposal.submitted_by?(@session.email)
 
   def sort_by_column(key)
     @table.sort_by(key)
