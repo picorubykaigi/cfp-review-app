@@ -48,7 +48,7 @@ module Index
     rating_count = @ratings.count(proposal.row)
     scores_visible = @ratings.rated?(proposal.row) || own?(proposal)
     tr(class: index == state.index ? 'proposal sel' : 'proposal',
-       onclick: ->(*_a) { open_at(index) }) do
+       onclick: ->(*_a) { show_at(index) }) do
       td(class: 'c-num') { scores_visible ? @ratings.average_text(proposal.row) : '' }
       td(class: 'c-num') { rating_count == 0 ? '' : rating_count.to_s }
       td(class: 'c-num') do

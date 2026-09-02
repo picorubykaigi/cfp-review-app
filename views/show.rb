@@ -10,10 +10,10 @@ module Show
           '« Return to Proposals'
         end
         div(class: 'bar-sub') { "#{state.index + 1} / #{total}" }
-        button(class: 'btn btn-default btn-sm', onclick: ->(*_a) { move(-1) }) do
+        button(class: 'btn btn-default btn-sm', onclick: ->(*_a) { show_at(state.index - 1) }) do
           'Previous Proposal'
         end
-        button(class: 'btn btn-primary btn-sm', onclick: ->(*_a) { move(1) }) do
+        button(class: 'btn btn-primary btn-sm', onclick: ->(*_a) { show_at(state.index + 1) }) do
           'Next Proposal'
         end
       end

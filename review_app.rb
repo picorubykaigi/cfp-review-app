@@ -176,11 +176,9 @@ class ReviewApp < Funicular::Component
     element.nil? ? '' : element[:value].to_s
   end
 
-  def move(direction) = open_at(state.index + direction)
+  def show_at(index) = guard('表示') { show(index) }
 
-  def open_at(index) = guard('表示') { do_open(index) }
-
-  def do_open(index)
+  def show(index)
     list = visible_proposals
     return if list.empty?
 
