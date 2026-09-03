@@ -25,7 +25,7 @@ module Show
       div(class: 'proposal-info-bar') do
         render_meta_item('Speaker', proposal.name)
         render_meta_item('Format', proposal.format_label)
-        render_meta_item('Links', speaker_links(proposal))
+        render_links(proposal)
         ''
       end
 
@@ -56,7 +56,7 @@ module Show
     return '' if text.nil? || text.empty?
     div(class: 'proposal-section') do
       h3(class: 'control-label') { label }
-      div(class: 'markdown') { text }
+      div(class: 'markdown') { render_linked_text(text) }
     end
   end
 
@@ -111,10 +111,57 @@ module Show
     email.split('@')[0].to_s
   end
 
-  def speaker_links(proposal)
-    parts = []
-    parts << "GitHub: #{proposal.github}" unless proposal.github.empty?
-    parts << "X: #{proposal.x_account}" unless proposal.x_account.empty?
-    parts.join('   ')
+  URL_PATTERN = %r{https?://[A-Za-z0-9\-._~:/?#\[\]@!$&%'()*+,;=]+}
+  TRAILING_CHARS = '.,;:!?)]>'
+
+  def render_linked_text(text)
+    position = 0
+    while position < text.size
+      found = text[position, text.size - position].match(URL_PATTERN)
+      break if found.nil?
+
+      start = position + found.begin(0)
+      url = trim_trailing(found[0])
+      span { text[position, start - position] } if start > position # 文頭から url が始まる場合は span を描画しない
+      a(href: url) { url }
+      position = start + url.size
+    end
+    span { text[position, text.size - position] } if position < text.size
+    ''
+  end
+
+  def trim_trailing(url)
+    length = url.size
+    while length > 1
+      break unless TRAILING_CHARS.include?(url[length - 1, 1])
+
+      length -= 1
+    end
+    url[0, length]
+  end
+
+  def render_links(proposal)
+    return '' if proposal.github.empty? && proposal.x_account.empty?
+
+    div(class: 'proposal-meta-item') do
+      div(class: 'info-item-heading') { 'Links' }
+      div(class: 'info-item-value') do
+        render_account('GitHub', 'https://github.com/', proposal.github)
+        render_account('X', 'https://x.com/', proposal.x_account)
+        ''
+      end
+    end
+  end
+
+  def render_account(label, base, handle)
+    return '' if handle.empty?
+
+    a(class: 'account-link', href: account_url(base, handle)) { "#{label}: #{handle}" }
+  end
+
+  def account_url(base, handle)
+    return handle if handle.start_with?('http')
+
+    "#{base}#{handle.sub('@', '')}"
   end
 end

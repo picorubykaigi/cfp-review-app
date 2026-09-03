@@ -226,6 +226,7 @@ td.c-format { white-space: nowrap; font-size: var(--font-size-small); color: var
 }
 
 .info-item-value { font-size: var(--font-size-base); }
+.account-link { margin-right: .9rem; }
 
 .fieldset-legend {
   font-size: var(--font-size-large);

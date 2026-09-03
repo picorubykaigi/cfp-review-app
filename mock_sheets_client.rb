@@ -18,11 +18,14 @@ module SheetsClient
      '実機のデモを交えます。',
      'トースターは誰の家にもあるので、聞いた人がその日から真似できます。',
      '実機を持ち込みます', '田中 花子', '組み込み Ruby を書いています',
-     'tanaka', 'tanaka_h'],
+     'tanaka', '@tanaka_h'],
     ['2026/07/02 12:30', 'b@example.com', 'mruby/c のスケジューラを読む', TALK,
      'タスクスケジューラの実装を1行ずつ追いかけます。',
      "コンテキストスイッチがどこで起きているかを、実際のコードで確かめます。\n" \
-     'wasm 版でも同じ仕組みが動いていることを見ます。',
+     "資料は https://example.com/slidesに置きます。\n" \
+     "検索例: https://example.com/search?q=こんにちは です。\n" \
+     "Markdown 記法: [foo](https://example.com/foo)も書かれうる。\n" \
+     '関連: https://github.com/picoruby/picoruby（本体）も参照します。',
      '内部を知ると、詰まったときの勘が働くようになります。',
      '', '鈴木 太郎', 'RTOS まわりが好きです', 'suzuki', ''],
     ['2026/07/03 22:17', 't@example.com', 'テスト4件目', SHOWCASE,
