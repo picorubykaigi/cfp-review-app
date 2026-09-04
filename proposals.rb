@@ -31,28 +31,53 @@ class Proposals
 
   def sorted(key, desc, ratings)
     Proposals.new(@list.sort do |left, right|
-      order = compare(left, right, key, ratings)
-      order = -order if desc
+      order = compare(left, right, key, desc, ratings)
       order == 0 ? (left.row <=> right.row) : order
     end)
   end
 
-  def compare(left, right, key, ratings)
+  def compare(left, right, key, desc, ratings)
     case key
     when 'ratings'
-      ratings.count(left.row) <=> ratings.count(right.row)
+      compare_count(left, right, desc, ratings)
     when 'standard_deviation'
-      ratings.standard_deviation(left.row) <=> ratings.standard_deviation(right.row)
+      compare_visible(left, right, desc, ratings) do
+        ratings.standard_deviation(left.row) <=> ratings.standard_deviation(right.row)
+      end
     when 'title'
-      left.title <=> right.title
+      flip(left.title <=> right.title, desc)
     when 'speaker'
-      left.name <=> right.name
+      flip(left.name <=> right.name, desc)
     when 'format'
-      left.format_label <=> right.format_label
-    else
-      ratings.average(left.row) <=> ratings.average(right.row)
+      flip(left.format_label <=> right.format_label, desc)
+    else # score, reset
+      compare_visible(left, right, desc, ratings) do
+        ratings.average(left.row) <=> ratings.average(right.row)
+      end
     end
   end
+
+  def compare_count(left, right, desc, ratings)
+    order = flip(ratings.count(left.row) <=> ratings.count(right.row), desc)
+    # 人数が同数のときは timestamp 順
+    order == 0 ? newest_first(left, right) : order
+  end
+
+  def compare_visible(left, right, desc, ratings)
+    left_hidden = !ratings.scores_visible?(left)
+    right_hidden = !ratings.scores_visible?(right)
+    if left_hidden && right_hidden
+      newest_first(left, right)
+    elsif left_hidden != right_hidden
+      flip(left_hidden ? -1 : 1, desc)
+    else
+      flip(yield, desc)
+    end
+  end
+
+  def newest_first(left, right) = (right.timestamp <=> left.timestamp)
+
+  def flip(order, desc) = (desc ? -order : order)
 
   def matches?(text, query)
     return true if query.empty?

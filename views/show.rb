@@ -82,7 +82,7 @@ module Show
 
   def render_others(proposal)
     div(class: 'others') do
-      if own?(proposal) || @ratings.rated?(proposal.row)
+      if @ratings.scores_visible?(proposal)
         render_rating_list(proposal)
       else
         div(class: 'others-none') { 'Ratings are shown once you save your own.' }

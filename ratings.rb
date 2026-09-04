@@ -29,6 +29,10 @@ class Ratings
   end
 
   def rated?(row) = !mine(row).nil?
+
+  # 自分が評価するまで他人の点数は見えない。自分の proposal は点数を入れられないので例外。
+  def scores_visible?(proposal) = rated?(proposal.row) || proposal.submitted_by?(@me)
+
   def count(row) = scores(row).size
 
   def average(row)

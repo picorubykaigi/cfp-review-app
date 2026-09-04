@@ -46,7 +46,7 @@ module Index
 
   def render_row(proposal, index)
     rating_count = @ratings.count(proposal.row)
-    scores_visible = @ratings.rated?(proposal.row) || own?(proposal)
+    scores_visible = @ratings.scores_visible?(proposal)
     tr(class: index == state.index ? 'proposal sel' : 'proposal',
        onclick: ->(*_a) { show_at(index) }) do
       td(class: 'c-num') { scores_visible ? @ratings.average_text(proposal.row) : '' }

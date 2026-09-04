@@ -1,7 +1,7 @@
 class TableState
   SORT_KEY = 'cfp_table_sort'
   DESC_KEY = 'cfp_table_desc'
-  DEFAULT_SORT = 'score'
+  UNSORTED = ''
   TEXT_COLUMNS = %w[title speaker format].freeze
 
   attr_reader :sort, :desc
@@ -9,7 +9,7 @@ class TableState
 
   def initialize(storage)
     @storage = storage
-    @sort = DEFAULT_SORT
+    @sort = UNSORTED
     @desc = false
     @speaker = ''
     @title = ''
@@ -33,7 +33,7 @@ class TableState
   end
 
   def reset
-    @sort = DEFAULT_SORT
+    @sort = UNSORTED
     @desc = false
     @storage.removeItem(SORT_KEY)
     @storage.removeItem(DESC_KEY)
