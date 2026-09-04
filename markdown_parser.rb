@@ -1,12 +1,13 @@
 # ブロック: [:heading, レベル, インライン] / [:paragraph, インライン] /
-#           [:list, 番号付きか, [インライン, ...]] / [:quote, インライン] / [:code, 文字列]
+#           [:list, 番号付きか, [項目, ...]] / [:quote, インライン] / [:code, 文字列]
+# 項目: [:item, インライン, [ネストしたリスト, ...]]
 # インライン: [:text, 文字列] / [:link, ラベル, URL] / [:code, 文字列] / [:strong, 文字列]
 class MarkdownParser
   BLANK = /^[ \t]*$/
   HEADING = /^([#]{1,6})[ ]+(.+)$/
   QUOTE = /^>[ ]?(.*)$/
-  BULLET = /^[-*][ ]+(.+)$/
-  ORDERED = /^[0-9]+\.[ ]+(.+)$/
+  BULLET = /^([ ]*)[-*][ ]+(.+)$/
+  ORDERED = /^([ ]*)[0-9]+\.[ ]+(.+)$/
   FENCE = /^```/
 
   LINK = /\[([^\]]*)\]\(([^)\s]+)\)/
@@ -55,9 +56,41 @@ class MarkdownParser
   end
 
   def parse_list(result, index, ordered:)
-    items, cursor = collect(index, ordered ? ORDERED : BULLET)
-    result << [:list, ordered, items.map { |item| inline(item) }]
+    pattern = ordered ? ORDERED : BULLET
+    depth = @lines[index].match(pattern)[1].size
+    items = []
+    cursor = index
+    while cursor < @lines.size
+      found = @lines[cursor].match(pattern)
+      break if found.nil? || found[1].size != depth
+
+      cursor = parse_list_item(items, cursor + 1, inline(found[2]), depth)
+    end
+    result << [:list, ordered, items]
     cursor
+  end
+
+  # 直後により深い字下げのリストが続くかぎり、その項目の子として取り込む
+  def parse_list_item(items, index, text, depth)
+    children = []
+    cursor = index
+    while cursor < @lines.size
+      nested = list_item(@lines[cursor])
+      break if nested.nil? || nested[0] <= depth
+
+      cursor = parse_list(children, cursor, ordered: nested[1])
+    end
+    items << [:item, text, children]
+    cursor
+  end
+
+  # @return [Array(Integer, Boolean), nil] 字下げの幅、番号付きか
+  def list_item(line)
+    found = line.match(ORDERED)
+    return [found[1].size, true] unless found.nil?
+
+    found = line.match(BULLET)
+    found.nil? ? nil : [found[1].size, false]
   end
 
   def parse_code(result, index)

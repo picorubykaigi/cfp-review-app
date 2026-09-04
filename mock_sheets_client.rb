@@ -29,6 +29,8 @@ module SheetsClient
      "- `mrb_run_step` の呼ばれ方\n" \
      "- [ソース](https://github.com/picoruby/picoruby)の読み方\n" \
      "- **ハマりどころ**\n" \
+     "  - タスクを跨ぐ例外\n" \
+     "  - 無限ループでの固まり方\n" \
      "\n" \
      "> wasm 版でも同じ仕組みが動いています。\n" \
      "\n" \

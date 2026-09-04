@@ -33,7 +33,12 @@ module ProposalBody
   end
 
   def render_body_list_items(items)
-    items.each { |nodes| li { render_body_inline(nodes) } }
+    items.each { |item| li { render_body_list_item(item) } }
+  end
+
+  def render_body_list_item(item)
+    render_body_inline(item[1])
+    item[2].each { |nested| render_body_block(nested) }
   end
 
   def render_body_inline(nodes)
