@@ -22,10 +22,21 @@ module SheetsClient
     ['2026/07/02 12:30', 'b@example.com', 'mruby/c のスケジューラを読む', TALK,
      'タスクスケジューラの実装を1行ずつ追いかけます。',
      "コンテキストスイッチがどこで起きているかを、実際のコードで確かめます。\n" \
+     "## 話す内容\n" \
+     "コンテキストは **タスク単位** で切り替わります。\n" \
      "資料は https://example.com/slidesに置きます。\n" \
-     "検索例: https://example.com/search?q=こんにちは です。\n" \
-     "Markdown 記法: [foo](https://example.com/foo)も書かれうる。\n" \
-     '関連: https://github.com/picoruby/picoruby（本体）も参照します。',
+     "\n" \
+     "- `mrb_run_step` の呼ばれ方\n" \
+     "- [ソース](https://github.com/picoruby/picoruby)の読み方\n" \
+     "- **ハマりどころ**\n" \
+     "\n" \
+     "> wasm 版でも同じ仕組みが動いています。\n" \
+     "\n" \
+     "```\n" \
+     "while true\n" \
+     "  mrb_run_step\n" \
+     "end\n" \
+     '```',
      '内部を知ると、詰まったときの勘が働くようになります。',
      '', '鈴木 太郎', 'RTOS まわりが好きです', 'suzuki', ''],
     ['2026/07/03 22:17', 't@example.com', 'テスト4件目', SHOWCASE,

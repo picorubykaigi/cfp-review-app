@@ -1,6 +1,7 @@
 require 'js'
 
 class ReviewApp < Funicular::Component
+  include ProposalBody
   include Signin
   include Index
   include Show

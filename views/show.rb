@@ -30,12 +30,12 @@ module Show
       end
 
       div(class: 'proposal-contents') do
-        render_section('Abstract', proposal.abstract)
+        render_proposal_section('Abstract', proposal.abstract)
         h2(class: 'fieldset-legend') { 'For Review Committee' }
-        render_section('Details', proposal.details)
-        render_section('Pitch', proposal.pitch)
-        render_section('Demo details', proposal.demo)
-        render_section('Speaker Bio', proposal.bio)
+        render_proposal_section('Details', proposal.details)
+        render_proposal_section('Pitch', proposal.pitch)
+        render_proposal_section('Demo details', proposal.demo)
+        render_proposal_section('Speaker Bio', proposal.bio)
         ''
       end
 
@@ -52,11 +52,12 @@ module Show
     end
   end
 
-  def render_section(label, text)
+  def render_proposal_section(label, text)
     return '' if text.nil? || text.empty?
+
     div(class: 'proposal-section') do
       h3(class: 'control-label') { label }
-      div(class: 'markdown') { render_linked_text(text) }
+      div(class: 'markdown') { render_body(text) }
     end
   end
 
@@ -109,35 +110,6 @@ module Show
 
   def short_name(email)
     email.split('@')[0].to_s
-  end
-
-  URL_PATTERN = %r{https?://[A-Za-z0-9\-._~:/?#\[\]@!$&%'()*+,;=]+}
-  TRAILING_CHARS = '.,;:!?)]>'
-
-  def render_linked_text(text)
-    position = 0
-    while position < text.size
-      found = text[position, text.size - position].match(URL_PATTERN)
-      break if found.nil?
-
-      start = position + found.begin(0)
-      url = trim_trailing(found[0])
-      span { text[position, start - position] } if start > position # 文頭から url が始まる場合は span を描画しない
-      a(href: url) { url }
-      position = start + url.size
-    end
-    span { text[position, text.size - position] } if position < text.size
-    ''
-  end
-
-  def trim_trailing(url)
-    length = url.size
-    while length > 1
-      break unless TRAILING_CHARS.include?(url[length - 1, 1])
-
-      length -= 1
-    end
-    url[0, length]
   end
 
   def render_links(proposal)
