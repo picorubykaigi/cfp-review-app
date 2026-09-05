@@ -16,8 +16,10 @@ class ReviewApp < Funicular::Component
     @config = SheetConfig.read(local_storage, JS.global[:location][:hash].to_s)
     @history = ScreenHistory.new
     @table = TableState.new(local_storage)
-    { phase: 'signin', message: '', index: 0,
-      score: '', busy: false, toast: '', table_revision: 0 }
+    {
+      phase: 'signin', message: '', index: 0, editing: '',
+      score: '', busy: false, toast: '', table_revision: 0,
+    }
   end
 
   def component_mounted
@@ -113,26 +115,45 @@ class ReviewApp < Funicular::Component
   end
 
   def on_filter_speaker(*_a)
-    @table.speaker = filter_value('.f-speaker')
+    @table.speaker = input_value('.f-speaker')
     redraw_table
   end
 
   def on_filter_title(*_a)
-    @table.title = filter_value('.f-title')
+    @table.title = input_value('.f-title')
     redraw_table
   end
 
   def on_filter_format(*_a)
-    @table.format = filter_value('.f-format')
+    @table.format = input_value('.f-format')
     redraw_table
   end
 
   # 値は TableState が持ち、state で再描画する
   def redraw_table = patch(table_revision: state.table_revision + 1)
 
-  def filter_value(selector)
+  def input_value(selector)
     element = JS.document.querySelector(selector)
     element.nil? ? '' : element[:value].to_s
+  end
+
+  def select_sheet(sheet_id)
+    @config.select(sheet_id)
+    patch(message: '')
+  end
+
+  def edit_sheet(sheet_id) = patch(editing: sheet_id)
+
+  def save_sheet_name(sheet_id)
+    return unless state.editing == sheet_id
+
+    @config.rename(sheet_id, input_value("#sheet-name-#{sheet_id}"))
+    patch(editing: '')
+  end
+
+  def remove_sheet(sheet_id)
+    @config.remove(sheet_id)
+    patch(phase: @config.missing? ? 'nosheet' : state.phase, editing: '', message: '')
   end
 
   def on_score_input(*_a) = patch(score: score_value)

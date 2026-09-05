@@ -130,6 +130,42 @@ h1, h2, h3 { margin-top: 20px; margin-bottom: 10px; font-weight: 600; }
 
 .err { color: #a94442; font-size: var(--font-size-small); margin-top: 1rem; min-height: 1.2em; }
 
+.sheets { margin-bottom: 1.5rem; }
+.sheets-head { font-weight: 700; margin-bottom: .5rem; }
+.sheets-hint { font-size: var(--font-size-small); color: var(--gray); margin-top: .6rem; }
+
+.sheet-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .4rem 0;
+  border-bottom: 1px solid var(--gray-lighter);
+}
+
+.sheet-pick { flex: none; margin: 0; }
+
+.sheet-body { flex: 1; min-width: 0; }
+
+.sheet-label { line-height: 1.35; }
+.sheet-label-none { color: var(--gray-light); }
+
+.sheet-id {
+  font-size: var(--font-size-small);
+  color: var(--gray);
+  line-height: 1.35;
+  word-break: break-all;
+}
+
+.sheet-name {
+  width: 100%;
+  font: inherit;
+  padding: 2px 6px;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius-base);
+}
+
+.btn-icon { flex: none; min-width: 2.2rem; }
+
 .list-wrap { max-width: 72rem; margin: 0 auto; padding: 0 1.25rem 5rem; }
 .detail-wrap { max-width: 48rem; margin: 0 auto; padding: 0 1.25rem 5rem; }
 
