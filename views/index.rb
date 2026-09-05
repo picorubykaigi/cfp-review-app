@@ -17,7 +17,7 @@ module Index
               th { input(type: 'text', class: 'f-speaker', oninput: :on_filter_speaker) }
               th { input(type: 'text', class: 'f-title', oninput: :on_filter_title) }
               th { input(type: 'text', class: 'f-format', oninput: :on_filter_format) }
-              ''
+              th { input(type: 'text', class: 'f-tag', oninput: :on_filter_tag) }
             end
             tr(class: 'head-row') do
               render_sortable_header('score', 'Score')
@@ -26,12 +26,11 @@ module Index
               render_sortable_header('speaker', 'Speakers')
               render_sortable_header('title', 'Talk Title')
               render_sortable_header('format', 'Session Format')
-              ''
+              render_sortable_header('tags', 'Reviewer Tags')
             end
           end
           tbody do
             rows.each_with_index { |proposal, index| render_row(proposal, index) }
-            ''
           end
         end
       end
@@ -57,7 +56,7 @@ module Index
       td(class: 'c-speaker') { proposal.name }
       td(class: 'c-title') { proposal.title }
       td(class: 'c-format') { proposal.format_label }
-      ''
+      td(class: 'c-tags') { render_tag_labels(@tags.of(proposal.row)) }
     end
   end
 end

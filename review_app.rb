@@ -5,20 +5,23 @@ class ReviewApp < Funicular::Component
   include Signin
   include Index
   include Show
+  include TagsView
 
   RANGE   = 'A2:L'
   RATINGS = 'Ratings!A2:E'
+  TAGS    = 'Tags!A2:D'
 
   def initialize_state
     @proposals = Proposals.new([])
     @ratings = Ratings.new([], '')
+    @tags = Tags.new([])
     @session = Session.new
     @config = SheetConfig.read(local_storage, JS.global[:location][:hash].to_s)
     @history = ScreenHistory.new
     @table = TableState.new(local_storage)
     {
       phase: 'signin', message: '', index: 0, editing: '',
-      score: '', busy: false, toast: '', table_revision: 0,
+      score: '', busy: false, toast: '', table_revision: 0, tag_edit: 0,
     }
   end
 
@@ -89,6 +92,7 @@ class ReviewApp < Funicular::Component
     @synced_row = nil
     @proposals = Proposals.build(SheetsClient.to_rows(body[:values]))
     load_ratings
+    load_tags
     patch(phase: 'list', busy: false, index: 0)
   end
 
@@ -99,8 +103,15 @@ class ReviewApp < Funicular::Component
     @ratings = Ratings.new(rows, @session.email)
   end
 
+  # タブが無ければ 400 が返り、その場合はタグ無しとして進む。
+  def load_tags
+    status, body = SheetsClient.get_values(@session.token, @config.sheet_id, TAGS)
+    rows = status == 200 ? SheetsClient.to_rows(body[:values]) : []
+    @tags = Tags.new(rows)
+  end
+
   def fail_with(message) = patch(phase: 'error', busy: false, message: message)
-  def visible_proposals = @table.apply(@proposals, @ratings)
+  def visible_proposals = @table.apply(@proposals, @ratings, @tags)
   def current = visible_proposals[state.index]
   def own?(proposal) = proposal.submitted_by?(@session.email)
 
@@ -126,6 +137,11 @@ class ReviewApp < Funicular::Component
 
   def on_filter_format(*_a)
     @table.format = input_value('.f-format')
+    redraw_table
+  end
+
+  def on_filter_tag(*_a)
+    @table.tag = input_value('.f-tag')
     redraw_table
   end
 
@@ -157,9 +173,9 @@ class ReviewApp < Funicular::Component
   end
 
   def on_score_input(*_a) = patch(score: score_value)
-  def save_rating(*_a) = guard('保存') { do_save }
+  def save_rating(*_a) = guard('保存') { do_save_rating }
 
-  def do_save
+  def do_save_rating
     proposal = current
     return if proposal.nil? || state.busy
 
@@ -178,6 +194,7 @@ class ReviewApp < Funicular::Component
     patch(busy: false)
     if status == 200
       @ratings.record(proposal.row, @session.email, score.to_s, comment)
+      keep_index(proposal.row)
       flash('保存しました')
     else
       hint = status == 400 ? '「Ratings」タブが無いかもしれません。' : ''
@@ -185,8 +202,56 @@ class ReviewApp < Funicular::Component
     end
   end
 
+  def edit_tags(*_a)
+    proposal = current
+    patch(tag_edit: proposal.nil? ? 0 : proposal.row)
+  end
+
+  def cancel_tags(*_a) = patch(tag_edit: 0)
+
+  def pick_tag(tag)
+    element = tag_el
+    return if element.nil?
+
+    element[:value] = @tags.to_text(@tags.parse("#{tag_value}#{Tags::SEPARATOR}#{tag}"))
+  end
+
+  def save_tags(*_a) = guard('保存') { do_save_tags }
+
+  def do_save_tags
+    proposal = current
+    return if proposal.nil? || state.busy
+
+    list = @tags.parse(tag_value.downcase)
+
+    patch(busy: true, toast: '')
+    status, body = SheetsClient.append(
+      @session.token,
+      @config.sheet_id,
+      TAGS,
+      [JS.global.cfpNow.to_s, @session.email, proposal.row.to_s, @tags.to_text(list)],
+    )
+    patch(busy: false)
+
+    if status == 200
+      @tags.record(proposal.row, list)
+      keep_index(proposal.row)
+      patch(tag_edit: 0)
+      flash('タグを保存しました')
+    else
+      hint = status == 400 ? '「Tags」タブが無いかもしれません。' : ''
+      flash("保存に失敗 (#{status}) #{hint}#{SheetsClient.error_message(body)}")
+    end
+  end
+
+  def keep_index(row)
+    index = visible_proposals.index_of(row)
+    patch(index: index) unless index < 0
+  end
+
   def comment_el = JS.document.querySelector('.rate-comment')
   def score_el = JS.document.querySelector('.rate-score')
+  def tag_el = JS.document.querySelector('.tag-input')
 
   def score_value
     element = score_el
@@ -195,6 +260,11 @@ class ReviewApp < Funicular::Component
 
   def comment_value
     element = comment_el
+    element.nil? ? '' : element[:value].to_s
+  end
+
+  def tag_value
+    element = tag_el
     element.nil? ? '' : element[:value].to_s
   end
 
@@ -208,7 +278,8 @@ class ReviewApp < Funicular::Component
     index = list.size - 1 if index >= list.size
     entering = state.phase != 'detail'
     rating = @ratings.mine(list[index].row)
-    patch(phase: 'detail', index: index, score: rating.nil? ? '' : rating[0], toast: '')
+    patch(phase: 'detail', index: index, score: rating.nil? ? '' : rating[0],
+          toast: '', tag_edit: 0)
     @history.push('list') if entering
   end
 
@@ -224,7 +295,7 @@ class ReviewApp < Funicular::Component
 
   def return_to(phase)
     @synced_row = nil
-    patch(phase: phase, toast: '')
+    patch(phase: phase, toast: '', tag_edit: 0)
   end
 
   def local_storage = JS.global[:localStorage]

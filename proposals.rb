@@ -21,6 +21,12 @@ class Proposals
   def each = @list.each { |proposal| yield proposal }
   def each_with_index = @list.each_with_index { |proposal, index| yield proposal, index }
 
+  def index_of(row)
+    found = -1
+    @list.each_with_index { |proposal, index| found = index if proposal.row == row }
+    found
+  end
+
   def matching(speaker, title, format)
     Proposals.new(@list.select do |proposal|
       matches?(proposal.name, speaker) &&
@@ -29,14 +35,20 @@ class Proposals
     end)
   end
 
-  def sorted(key, desc, ratings)
+  def tagged(query, tags)
+    return self if query.empty?
+
+    Proposals.new(@list.select { |proposal| matches?(tags.text(proposal.row), query) })
+  end
+
+  def sorted(key, desc, ratings, tags)
     Proposals.new(@list.sort do |left, right|
-      order = compare(left, right, key, desc, ratings)
+      order = compare(left, right, key, desc, ratings, tags)
       order == 0 ? (left.row <=> right.row) : order
     end)
   end
 
-  def compare(left, right, key, desc, ratings)
+  def compare(left, right, key, desc, ratings, tags)
     case key
     when 'ratings'
       compare_count(left, right, desc, ratings)
@@ -50,6 +62,8 @@ class Proposals
       flip(left.name <=> right.name, desc)
     when 'format'
       flip(left.format_label <=> right.format_label, desc)
+    when 'tags'
+      flip(tags.text(left.row) <=> tags.text(right.row), desc)
     else # score, reset
       compare_visible(left, right, desc, ratings) do
         ratings.average(left.row) <=> ratings.average(right.row)

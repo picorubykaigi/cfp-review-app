@@ -33,6 +33,7 @@
   --font-size-large: calc(var(--font-size-base) * 1.25);
   --font-size-small: calc(var(--font-size-base) * 0.85);
   --font-size-xs: calc(var(--font-size-base) * 0.75);
+  --font-size-compact: calc(var(--font-size-base) * 0.6);
   --line-height-base: 1.428571429;
 
   --padding-base-vertical: 6px;
@@ -86,6 +87,20 @@ h1, h2, h3 { margin-top: 20px; margin-bottom: 10px; font-weight: 600; }
   padding: var(--padding-small-vertical) 10px;
 }
 
+.btn-success {
+  background-color: var(--green);
+  border-color: #147b30;
+  color: var(--white);
+}
+.btn-success:hover, .btn-success:focus { background-color: #147b30; border-color: #106328; }
+
+.btn-danger {
+  background-color: #e1000b;
+  border-color: #c80009;
+  color: var(--white);
+}
+.btn-danger:hover, .btn-danger:focus { background-color: #c80009; border-color: #af0008; }
+
 .btn-default {
   background-color: var(--white);
   border-color: #ccc;
@@ -113,6 +128,7 @@ h1, h2, h3 { margin-top: 20px; margin-bottom: 10px; font-weight: 600; }
 .label-primary { background-color: var(--bright-blue); border: 1px solid #1782c0; color: #fff; }
 .label-success { background-color: var(--state-success-bg); border: 1px solid #67e58c; color: var(--state-success-text); }
 .label-default { background-color: var(--gray-lighter); border: 1px solid #e1e1e1; color: var(--gray); }
+.label-compact { font-size: var(--font-size-compact); padding: .2em .6em .35em; }
 
 .gate { max-width: 36rem; margin: 0 auto; padding: 3rem 1.25rem; }
 .gate h2 { margin-top: 0; font-size: calc(var(--font-size-base) * 1.7); }
@@ -230,6 +246,25 @@ td.c-num { white-space: nowrap; font-weight: 700; }
 td.c-title { text-align: left; min-width: 16rem; }
 td.c-speaker { white-space: nowrap; }
 td.c-format { white-space: nowrap; font-size: var(--font-size-small); color: var(--gray); }
+td.c-tags { text-align: left; min-width: 8rem; }
+
+.tag-label { margin: 0 .25rem .2rem 0; }
+.tag-none { color: var(--gray-light); font-style: italic; }
+.tag-item { flex: 1 1 18rem; }
+.tag-edit { display: flex; align-items: center; gap: .35rem; }
+
+.tag-input {
+  flex: 1;
+  min-width: 10rem;
+  font: inherit;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius-base);
+}
+
+.tag-suggest { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .45rem; }
+.tag-suggest-item { font-size: var(--font-size-xs); color: var(--gray); }
+.info-item-value .btn-icon { margin-left: .4rem; vertical-align: baseline; }
 
 
 .page-header {

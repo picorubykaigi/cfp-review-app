@@ -49,8 +49,7 @@ module SheetsClient
     def append(token, sheet_id, range, cells)
       url = "#{BASE}/#{enc(sheet_id)}/values/#{enc(range)}:append" \
             '?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS'
-      body = JS.global.cfpValuesBody(cells[0], cells[1], cells[2], cells[3], cells[4]).to_s
-      request(url, post_opts(token, body))
+      request(url, post_opts(token, JSON.generate(values: [cells])))
     end
 
     def my_email(token)

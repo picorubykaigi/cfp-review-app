@@ -1,7 +1,3 @@
-window.cfpValuesBody = function (a, b, c, d, e) {
-  return JSON.stringify({ values: [[a, b, c, d, e]] });
-};
-
 window.cfpNow = function () {
   return new Date().toISOString();
 };

@@ -26,7 +26,7 @@ module Show
         render_meta_item('Speaker', proposal.name)
         render_meta_item('Format', proposal.format_label)
         render_links(proposal)
-        ''
+        render_tag_item(proposal)
       end
 
       div(class: 'proposal-contents') do
@@ -36,7 +36,6 @@ module Show
         render_proposal_section('Pitch', proposal.pitch)
         render_proposal_section('Demo details', proposal.demo)
         render_proposal_section('Speaker Bio', proposal.bio)
-        ''
       end
 
       render_rating(proposal) unless own?(proposal)

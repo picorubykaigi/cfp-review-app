@@ -70,13 +70,24 @@ module SheetsClient
       ]
     end
 
+    def tags_store
+      $mock_tags ||= [
+        ['2026-08-30T01:00:00.000Z', 'alice@example.com', '5', '推し, 要デモ確認'],
+        ['2026-08-30T02:00:00.000Z', 'bob@example.com',   '6', '初心者向け']
+      ]
+    end
+
     def get_values(_token, _sheet_id, range)
-      rows = range == 'Ratings!A2:E' ? ratings_store : FAKE
+      rows = case range
+             when 'Ratings!A2:E' then ratings_store
+             when 'Tags!A2:D'    then tags_store
+             else FAKE
+             end
       [200, { values: rows }]
     end
 
-    def append(_token, _sheet_id, _range, cells)
-      ratings_store << cells
+    def append(_token, _sheet_id, range, cells)
+      (range == 'Tags!A2:D' ? tags_store : ratings_store) << cells
       [200, nil]
     end
 
