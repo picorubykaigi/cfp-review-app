@@ -1,5 +1,5 @@
 # ブロック: [:heading, レベル, インライン] / [:paragraph, インライン] /
-#           [:list, 番号付きか, [項目, ...]] / [:quote, インライン] / [:code, 文字列]
+#           [:list, 番号付きか, [項目, ...]] / [:quote, インライン] / [:code, 言語, 文字列]
 # 項目: [:item, インライン, [ネストしたリスト, ...]]
 # インライン: [:text, 文字列] / [:link, ラベル, URL] / [:code, 文字列] / [:strong, 文字列]
 class MarkdownParser
@@ -9,6 +9,7 @@ class MarkdownParser
   BULLET = /^([ ]*)[-*][ ]+(.+)$/
   ORDERED = /^([ ]*)[0-9]+\.[ ]+(.+)$/
   FENCE = /^```/
+  FENCE_LANGUAGE = /^```[ ]*([A-Za-z0-9_+-]*)/
 
   LINK = /\[([^\]]*)\]\(([^)\s]+)\)/
   STRONG = /\*\*([^*]+)\*\*/
@@ -94,6 +95,7 @@ class MarkdownParser
   end
 
   def parse_code(result, index)
+    language = @lines[index].match(FENCE_LANGUAGE)[1]
     collected = []
     cursor = index + 1
     while cursor < @lines.size
@@ -102,7 +104,7 @@ class MarkdownParser
       collected << @lines[cursor]
       cursor += 1
     end
-    result << [:code, collected.join("\n")]
+    result << [:code, "#{language}", collected.join("\n")]
     cursor < @lines.size ? cursor + 1 : cursor
   end
 

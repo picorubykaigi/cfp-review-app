@@ -22,6 +22,7 @@ class ReviewApp < Funicular::Component
     {
       phase: 'signin', message: '', index: 0, editing: '',
       score: '', busy: false, toast: '', table_revision: 0, tag_edit: 0,
+      prism_ready: false,
     }
   end
 
@@ -34,6 +35,7 @@ class ReviewApp < Funicular::Component
       patch(phase: 'nosheet')
     end
     JS.global.addEventListener('popstate') { |_e| on_popstate }
+    JS.global.addEventListener('prism-ready') { |_e| patch(prism_ready: true) }
   end
 
   # 再描画は入力中の値を保持する（＝提案を切り替えても前のコメントが残る）。

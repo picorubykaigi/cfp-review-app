@@ -17,6 +17,7 @@
 
     <script src="config.js"></script>
     <script src="bridge.js"></script>
+    <script type="module" src="prism_loader.js"></script>
     <script>
       window.CFP_CLIENT_ID = 'dev';
       window.cfpSignIn = function (callback) { callback('dev-token'); };
@@ -28,6 +29,7 @@
       'sheets_client.rb',
       'proposal.rb',
       'markdown_parser.rb',
+      'syntax_highlighter.rb',
       'proposals.rb',
       'ratings.rb',
       'tags.rb',
