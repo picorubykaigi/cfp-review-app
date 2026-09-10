@@ -29,6 +29,16 @@
   --link-color: var(--bright-blue);
   --legend-border-color: #e5e5e5;
 
+  --code-bg: #2b2836;
+  --code-fg: #f0ede2;
+  --code-comment: #8b8199;
+  --code-keyword: #f4707c;
+  --code-string: #8ed081;
+  --code-number: #f2c14e;
+  --code-constant: #7fd7ff;
+  --code-function: #a7c4f2;
+  --code-variable: #ffb3a7;
+
   --font-size-base: 14px;
   --font-size-large: calc(var(--font-size-base) * 1.25);
   --font-size-small: calc(var(--font-size-base) * 0.85);
@@ -407,12 +417,21 @@ td.c-tags { text-align: left; min-width: 8rem; }
   white-space: pre-wrap;
   font-family: ui-monospace, Menlo, monospace;
   font-size: var(--font-size-small);
-  background: var(--gray-lighter);
+  background: var(--code-bg);
+  color: var(--code-fg);
   border-radius: var(--border-radius-base);
   padding: .6rem .8rem;
   margin-bottom: 1rem;
   overflow-x: auto;
 }
+
+.md-comment { color: var(--code-comment); }
+.md-keyword { color: var(--code-keyword); }
+.md-string, .md-symbol { color: var(--code-string); }
+.md-number, .md-builtin { color: var(--code-number); }
+.md-constant { color: var(--code-constant); }
+.md-function { color: var(--code-function); }
+.md-variable { color: var(--code-variable); }
 
 .md-code {
   font-family: ui-monospace, Menlo, monospace;

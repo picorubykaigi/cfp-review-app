@@ -9,7 +9,28 @@ module ProposalBody
     when :paragraph then div(class: 'md-paragraph') { render_body_inline(block[1]) }
     when :list      then render_body_list(block[1], block[2])
     when :quote     then div(class: 'md-quote') { render_body_inline(block[1]) }
-    else div(class: 'md-pre') { block[1] }
+    else render_body_code(block[1], block[2])
+    end
+  end
+
+  def render_body_code(language, code)
+    div(class: 'md-pre') do
+      SyntaxHighlighter.new(code, language).tokens.each { |token| render_body_token(token) }
+    end
+  end
+
+  def render_body_token(token)
+    case token[0]
+    when :comment  then span(class: 'md-comment') { token[1] }
+    when :string   then span(class: 'md-string') { token[1] }
+    when :symbol   then span(class: 'md-symbol') { token[1] }
+    when :number   then span(class: 'md-number') { token[1] }
+    when :keyword  then span(class: 'md-keyword') { token[1] }
+    when :builtin  then span(class: 'md-builtin') { token[1] }
+    when :constant then span(class: 'md-constant') { token[1] }
+    when :function then span(class: 'md-function') { token[1] }
+    when :variable then span(class: 'md-variable') { token[1] }
+    else span { token[1] }
     end
   end
 
