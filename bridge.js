@@ -19,8 +19,6 @@ window.cfpSignIn = function (callback) {
   }
 };
 
-window.cfpPushState = function () {
-  history.pushState({ cfp: 1 }, '', location.href);
+window.cfpDropHash = function () {
+  history.replaceState(history.state, '', location.pathname + location.search);
 };
-
-window.cfpBack = function () { history.back(); };

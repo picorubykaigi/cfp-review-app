@@ -16,8 +16,8 @@ class ReviewApp < Funicular::Component
     @ratings = Ratings.new([], '')
     @tags = Tags.new([])
     @session = Session.new
-    @config = SheetConfig.read(local_storage, JS.global[:location][:hash].to_s)
-    @history = ScreenHistory.new
+    location_hash = JS.global[:location][:hash].to_s
+    @config = SheetConfig.read(local_storage, Permalink.sheet_id(location_hash))
     @table = TableState.new(local_storage)
     {
       phase: 'signin', message: '', index: 0, editing: '',
@@ -34,7 +34,7 @@ class ReviewApp < Funicular::Component
     elsif @config.missing?
       patch(phase: 'nosheet')
     end
-    JS.global.addEventListener('popstate') { |_e| on_popstate }
+    JS.global.addEventListener('hashchange') { |_e| on_hashchange }
     JS.global.addEventListener('prism-ready') { |_e| patch(prism_ready: true) }
   end
 
@@ -96,6 +96,7 @@ class ReviewApp < Funicular::Component
     load_ratings
     load_tags
     patch(phase: 'list', busy: false, index: 0)
+    follow_permalink
   end
 
   # タブが無ければ 400 が返り、その場合は採点ゼロとして進む。
@@ -270,34 +271,54 @@ class ReviewApp < Funicular::Component
     element.nil? ? '' : element[:value].to_s
   end
 
-  def show_at(index) = guard('表示') { show(index) }
+  def show_at(index) = guard('表示') { open_at(index) }
 
-  def show(index)
+  # 描画は hashchange のハンドラで行う
+  def open_at(index)
     list = visible_proposals
     return if list.empty?
 
     index = 0 if index < 0
     index = list.size - 1 if index >= list.size
-    entering = state.phase != 'detail'
-    rating = @ratings.mine(list[index].row)
+    Permalink.show(list[index].row)
+  end
+
+  def on_hashchange(*_a)
+    return if state.phase != 'list' && state.phase != 'detail'
+
+    guard('表示') { follow_permalink }
+  end
+
+  def follow_permalink
+    row = Permalink.row(JS.global[:location][:hash].to_s)
+    if row.nil?
+      return_to_list
+    else
+      index = visible_proposals.index_of(row)
+      if index < 0
+        Permalink.clear
+        return_to_list
+        flash('リンク先のプロポーザルが見つかりませんでした')
+      else
+        show(index)
+      end
+    end
+  end
+
+  def show(index)
+    rating = @ratings.mine(visible_proposals[index].row)
     patch(phase: 'detail', index: index, score: rating.nil? ? '' : rating[0],
           toast: '', tag_edit: 0)
-    @history.push('list') if entering
   end
 
   def back_to_list(*_a)
-    @history.empty? ? return_to('list') : @history.back
+    Permalink.clear
+    return_to_list
   end
 
-  def on_popstate(*_a)
-    return if @history.empty?
-
-    return_to(@history.pop)
-  end
-
-  def return_to(phase)
+  def return_to_list
     @synced_row = nil
-    patch(phase: phase, toast: '', tag_edit: 0)
+    patch(phase: 'list', toast: '', tag_edit: 0)
   end
 
   def local_storage = JS.global[:localStorage]
