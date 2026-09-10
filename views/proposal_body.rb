@@ -69,7 +69,7 @@ module ProposalBody
   def render_body_node(node)
     case node[0]
     when :text   then span { node[1] }
-    when :link   then a(href: node[2]) { node[1] }
+    when :link   then a(href: node[2], target: '_blank', rel: 'noopener noreferrer') { node[1] }
     when :code   then span(class: 'md-code') { node[1] }
     else span(class: 'md-strong') { node[1] }
     end

@@ -127,7 +127,7 @@ module Show
   def render_account(label, base, handle)
     return '' if handle.empty?
 
-    a(class: 'account-link', href: account_url(base, handle)) { "#{label}: #{handle}" }
+    a(class: 'account-link', href: account_url(base, handle), target: '_blank', rel: 'noopener noreferrer') { "#{label}: #{handle}" }
   end
 
   def account_url(base, handle)
