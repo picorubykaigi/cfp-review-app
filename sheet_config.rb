@@ -4,9 +4,9 @@ class SheetConfig
   ROW_SEPARATOR = "\n"
   FIELD_SEPARATOR = "\t"
 
-  def self.read(storage, location_hash)
+  def self.read(storage, sheet_id)
     config = new(storage)
-    config.add(location_hash.sub('#', ''))
+    config.add(sheet_id)
     config
   end
 
