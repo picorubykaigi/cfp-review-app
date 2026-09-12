@@ -2,10 +2,10 @@ class TableState
   SORT_KEY = 'cfp_table_sort'
   DESC_KEY = 'cfp_table_desc'
   UNSORTED = ''
-  TEXT_COLUMNS = %w[title speaker format tags].freeze
+  TEXT_COLUMNS = %w[title speaker format tags state].freeze
 
   attr_reader :sort, :desc
-  attr_writer :speaker, :title, :format, :tag
+  attr_writer :speaker, :title, :format, :tag, :state
 
   def initialize(storage)
     @storage = storage
@@ -15,13 +15,15 @@ class TableState
     @title = ''
     @format = ''
     @tag = ''
+    @state = ''
     restore
   end
 
-  def apply(proposals, ratings, tags)
+  def apply(proposals, ratings, tags, states)
     proposals.matching(@speaker, @title, @format)
       .tagged(@tag, tags)
-      .sorted(@sort, @desc, ratings, tags)
+      .in_state(@state, states)
+      .sorted(@sort, @desc, ratings, tags, states)
   end
 
   # 同じ列を再度押したら向きを変える。別の列なら、数値の列は降順、文字の列は昇順にソートする。

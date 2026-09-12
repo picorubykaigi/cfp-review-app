@@ -24,6 +24,10 @@
   --state-success-text: #3c763d;
   --state-info-bg: #b9dff5;
   --state-info-text: #31708f;
+  --state-warning-bg: #e3e197;
+  --state-warning-text: #8a6d3b;
+  --state-danger-bg: #fde3e4;
+  --state-danger-text: #a94442;
 
   --text-color: var(--gray-dark);
   --link-color: var(--bright-blue);
@@ -97,12 +101,24 @@ h1, h2, h3 { margin-top: 20px; margin-bottom: 10px; font-weight: 600; }
   padding: var(--padding-small-vertical) 10px;
 }
 
+.btn-xs {
+  font-size: var(--font-size-xs);
+  padding: 2px 7px;
+}
+
 .btn-success {
   background-color: var(--green);
   border-color: #147b30;
   color: var(--white);
 }
 .btn-success:hover, .btn-success:focus { background-color: #147b30; border-color: #106328; }
+
+.btn-warning {
+  background-color: #d3d05b;
+  border-color: #ceca47;
+  color: var(--gray-darker);
+}
+.btn-warning:hover, .btn-warning:focus { background-color: #ceca47; border-color: #c4c03d; }
 
 .btn-danger {
   background-color: #e1000b;
@@ -138,6 +154,8 @@ h1, h2, h3 { margin-top: 20px; margin-bottom: 10px; font-weight: 600; }
 .label-primary { background-color: var(--bright-blue); border: 1px solid #1782c0; color: #fff; }
 .label-success { background-color: var(--state-success-bg); border: 1px solid #67e58c; color: var(--state-success-text); }
 .label-default { background-color: var(--gray-lighter); border: 1px solid #e1e1e1; color: var(--gray); }
+.label-warning { background-color: var(--state-warning-bg); border: 1px solid #dedb83; color: var(--state-warning-text); }
+.label-danger { background-color: var(--state-danger-bg); border: 1px solid #fbcbcd; color: var(--state-danger-text); }
 .label-compact { font-size: var(--font-size-compact); padding: .2em .6em .35em; }
 
 .gate { max-width: 36rem; margin: 0 auto; padding: 3rem 1.25rem; }
@@ -192,7 +210,7 @@ h1, h2, h3 { margin-top: 20px; margin-bottom: 10px; font-weight: 600; }
 
 .btn-icon { flex: none; min-width: 2.2rem; }
 
-.list-wrap { max-width: 72rem; margin: 0 auto; padding: 0 1.25rem 5rem; }
+.list-wrap { max-width: 80rem; margin: 0 auto; padding: 0 1.25rem 5rem; }
 .detail-wrap { max-width: 48rem; margin: 0 auto; padding: 0 1.25rem 5rem; }
 
 .bar {
@@ -231,23 +249,26 @@ table.datatable thead > tr > th {
   color: var(--gray-dark);
 }
 
-.head-row th { border-bottom: 2px solid var(--brand-gray); white-space: nowrap; }
+.head-row th { border-bottom: 2px solid var(--brand-gray); white-space: nowrap; vertical-align: bottom; }
+.head-row th.h-standard_deviation { white-space: normal; width: 5rem; }
 
 th.sortable { cursor: pointer; user-select: none; }
 th.sortable:hover { color: var(--bright-blue); }
 
 .filter-row th { padding: .35rem .4rem; border-bottom: none; }
-.filter-row input {
+.filter-row input,
+.filter-row select {
   width: 100%;
   min-width: 6rem;
   font: inherit;
+  font-weight: normal;
   font-size: var(--font-size-small);
   padding: 2px 5px;
   border: 1px solid #ccc;
   border-radius: var(--border-radius-base);
 }
 
-tr.proposal { cursor: pointer; }
+tr.proposal td { cursor: pointer; }
 tr.proposal:nth-of-type(odd) td { background: rgba(0, 0, 0, .03); }
 tr.proposal:hover td { background: var(--beige); }
 tr.proposal.sel td { box-shadow: inset 0 0 0 9999px rgba(26, 149, 221, .10); }
@@ -257,6 +278,9 @@ td.c-title { text-align: left; min-width: 16rem; }
 td.c-speaker { white-space: nowrap; }
 td.c-format { white-space: nowrap; font-size: var(--font-size-small); color: var(--gray); }
 td.c-tags { text-align: left; min-width: 8rem; }
+td.c-status { white-space: nowrap; }
+td.c-actions { white-space: nowrap; cursor: default; }
+td.c-actions .state-buttons { flex-wrap: nowrap; }
 
 .tag-label { margin: 0 .25rem .2rem 0; }
 .tag-none { color: var(--gray-light); font-style: italic; }
@@ -275,9 +299,16 @@ td.c-tags { text-align: left; min-width: 8rem; }
 .tag-suggest { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .45rem; }
 .tag-suggest-item { font-size: var(--font-size-xs); color: var(--gray); }
 .info-item-value .btn-icon { margin-left: .4rem; vertical-align: baseline; }
+.state-buttons { display: inline-flex; flex-wrap: wrap; gap: .35rem; }
+.state-header { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
 
 
 .page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem 1.5rem;
   border-bottom: 1px solid var(--legend-border-color);
   padding: 1.5rem 0 .75rem;
   margin-bottom: 1rem;
