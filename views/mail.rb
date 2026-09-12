@@ -1,70 +1,107 @@
-module MailView
-  def render_mail
+class Mail < Funicular::Component
+  def initialize_state
+    @texts = MailTexts.new
+    { status: States::ACCEPTED, preview_row: 0 }
+  end
+
+  def render
+    @texts.load
     div(class: 'mail-wrap') do
-      div(class: 'bar') do
-        button(class: 'btn btn-primary btn-sm', onclick: :back_to_list) do
-          '« Return to Proposals'
-        end
-        div(class: 'bar-title') { 'Mail' }
-      end
-      render_mail_picker
-      render_mail_table
+      render_header
+      render_picker
+      render_body
     end
   end
 
-  def render_mail_picker
+  private
+
+  def proposals = props[:proposals]
+  def states = props[:states]
+  def recipients = proposals.in_state(state.status, states)
+  def mail_for(proposal) = MailTemplate.new(@texts.of(state.status), proposal)
+
+  def previewed
+    found = nil
+    recipients.each { |proposal| found = proposal if proposal.row == state.preview_row }
+    found
+  end
+
+  def on_status(*_event)
+    element = JS.document.querySelector('.mail-state')
+    patch(status: element.nil? ? state.status : element[:value].to_s, preview_row: 0)
+  end
+
+  def copy(label, body)
+    JS.global[:navigator][:clipboard].writeText(body)
+    props[:on_flash].call("#{label}をコピーしました")
+  rescue => error
+    props[:on_flash].call("コピー: #{error.class} #{error.message}")
+  end
+
+  def render_header
+    div(class: 'bar') do
+      button(class: 'btn btn-primary btn-sm', onclick: ->(*_event) { props[:on_back].call }) do
+        '« Return to Proposals'
+      end
+      div(class: 'bar-title') { 'Mail' }
+    end
+  end
+
+  def render_picker
     div(class: 'mail-field') do
       div(class: 'info-item-heading') { 'Status' }
-      select(class: 'mail-state', onchange: :on_mail_state) do
+      select(class: 'mail-state', onchange: :on_status) do
         MailTemplate::STATES.each { |value| option(value: value) { States.label_of(value) } }
         ''
       end
     end
   end
 
-  def render_mail_table
-    if mail_text.empty?
-      render_missing_template
-    else
+  def render_body
+    if @texts.exists?(state.status)
       render_recipients
+    else
+      render_missing_template
     end
   end
 
   def render_missing_template
-    path = MailTemplate::PATHS[state.mail_state]
+    path = MailTemplate::PATHS[state.status]
     div(class: 'mail-none') { "#{path} がありません。#{path}.sample をコピーしてください。" }
   end
 
   def render_recipients
-    list = mail_proposals
+    list = recipients
     if list.empty?
       div(class: 'mail-none') { '対象がいません。' }
     else
-      render_mail_list(list)
-      render_mail_preview
+      render_list(list)
+      render_preview
     end
   end
 
-  def render_mail_list(list)
+  def render_list(list)
     div(class: 'table-scroll') do
       table(class: 'datatable') do
-        thead do
-          tr(class: 'head-row') do
-            th { 'Speakers' }
-            th { 'Talk Title' }
-            th { 'Session Format' }
-            th { 'Email' }
-            th(class: 'actions') { 'Copy' }
-          end
-        end
-        tbody { list.each { |proposal| render_mail_row(proposal) } }
+        thead { render_head }
+        tbody { list.each { |proposal| render_row(proposal) } }
       end
     end
   end
 
-  def render_mail_row(proposal)
-    open = ->(*_event) { preview_mail(proposal.row) }
-    tr(class: state.mail_row == proposal.row ? 'proposal sel' : 'proposal') do
+  def render_head
+    tr(class: 'head-row') do
+      th { 'Speakers' }
+      th { 'Talk Title' }
+      th { 'Session Format' }
+      th { 'Email' }
+      th(class: 'actions') { 'Copy' }
+    end
+  end
+
+  def render_row(proposal)
+    open = ->(*_event) { patch(preview_row: proposal.row) }
+    tr(class: state.preview_row == proposal.row ? 'proposal sel' : 'proposal') do
       td(class: 'c-speaker', onclick: open) { proposal.name }
       td(class: 'c-title', onclick: open) { proposal.title }
       td(class: 'c-format', onclick: open) { proposal.format_label }
@@ -81,11 +118,11 @@ module MailView
     ''
   end
 
-  def render_copy_button(label, text)
-    button(class: 'btn btn-xs btn-default', onclick: ->(*_event) { copy(label, text) }) { label }
+  def render_copy_button(label, body)
+    button(class: 'btn btn-xs btn-default', onclick: ->(*_event) { copy(label, body) }) { label }
   end
 
-  def render_mail_preview
+  def render_preview
     proposal = previewed
     if proposal.nil?
       ''
