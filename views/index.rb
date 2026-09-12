@@ -6,6 +6,7 @@ module Index
         div(class: 'bar-title') { 'CFP Review App' }
         div(class: 'bar-sub') { "#{rows.size} proposals" }
         button(class: 'btn btn-default btn-sm', onclick: :reset_sort) { 'Reset Sort' }
+        button(class: 'btn btn-default btn-sm', onclick: :open_mail) { 'Mail' }
       end
       div(class: 'table-scroll') do
         table(class: 'datatable proposal-list') do
@@ -18,6 +19,8 @@ module Index
               th { input(type: 'text', class: 'f-title', oninput: :on_filter_title) }
               th { input(type: 'text', class: 'f-format', oninput: :on_filter_format) }
               th { input(type: 'text', class: 'f-tag', oninput: :on_filter_tag) }
+              th { render_state_filter }
+              th { '' }
             end
             tr(class: 'head-row') do
               render_sortable_header('score', 'Score')
@@ -27,6 +30,8 @@ module Index
               render_sortable_header('title', 'Talk Title')
               render_sortable_header('format', 'Session Format')
               render_sortable_header('tags', 'Reviewer Tags')
+              render_sortable_header('state', 'Status')
+              th(class: 'actions') { 'Soft Actions' }
             end
           end
           tbody do
@@ -38,25 +43,29 @@ module Index
   end
 
   def render_sortable_header(key, label)
-    th(class: 'sortable', onclick: ->(*_a) { sort_by_column(key) }) do
+    th(class: "sortable h-#{key}", onclick: ->(*_a) { sort_by_column(key) }) do
       "#{label}#{@table.marker(key)}"
     end
   end
 
+  # onclick を行に付けるとハンドラが呼ばれる時には伝播が完了して
+  # stopPropagation が効かないため、セルごとに付けている
   def render_row(proposal, index)
     rating_count = @ratings.count(proposal.row)
     scores_visible = @ratings.scores_visible?(proposal)
-    tr(class: index == state.index ? 'proposal sel' : 'proposal',
-       onclick: ->(*_a) { show_at(index) }) do
-      td(class: 'c-num') { scores_visible ? @ratings.average_text(proposal.row) : '' }
-      td(class: 'c-num') { rating_count == 0 ? '' : rating_count.to_s }
-      td(class: 'c-num') do
+    open = ->(*_event) { show_at(index) }
+    tr(class: index == state.index ? 'proposal sel' : 'proposal') do
+      td(class: 'c-num', onclick: open) { scores_visible ? @ratings.average_text(proposal.row) : '' }
+      td(class: 'c-num', onclick: open) { rating_count == 0 ? '' : rating_count.to_s }
+      td(class: 'c-num', onclick: open) do
         scores_visible ? @ratings.standard_deviation_text(proposal.row) : ''
       end
-      td(class: 'c-speaker') { proposal.name }
-      td(class: 'c-title') { proposal.title }
-      td(class: 'c-format') { proposal.format_label }
-      td(class: 'c-tags') { render_tag_labels(@tags.of(proposal.row)) }
+      td(class: 'c-speaker', onclick: open) { proposal.name }
+      td(class: 'c-title', onclick: open) { proposal.title }
+      td(class: 'c-format', onclick: open) { proposal.format_label }
+      td(class: 'c-tags', onclick: open) { render_tag_labels(@tags.of(proposal.row)) }
+      td(class: 'c-status', onclick: open) { render_state_label(proposal.row) }
+      td(class: 'c-actions') { div(class: 'state-buttons') { render_state_buttons(proposal.row) } }
     end
   end
 end

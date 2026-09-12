@@ -77,17 +77,29 @@ module SheetsClient
       ]
     end
 
+    def states_store
+      $mock_states ||= [
+        ['2026-08-31T01:00:00.000Z', 'alice@example.com', '5', 'accepted'],
+        ['2026-08-31T02:00:00.000Z', 'alice@example.com', '6', 'soft waitlisted'],
+        ['2026-08-31T03:00:00.000Z', 'alice@example.com', '8', 'soft rejected']
+      ]
+    end
+
+    def store_for(range)
+      case range
+      when 'Ratings!A2:E' then ratings_store
+      when 'Tags!A2:D'    then tags_store
+      when 'States!A2:D'  then states_store
+      else FAKE
+      end
+    end
+
     def get_values(_token, _sheet_id, range)
-      rows = case range
-             when 'Ratings!A2:E' then ratings_store
-             when 'Tags!A2:D'    then tags_store
-             else FAKE
-             end
-      [200, { values: rows }]
+      [200, { values: store_for(range) }]
     end
 
     def append(_token, _sheet_id, range, cells)
-      (range == 'Tags!A2:D' ? tags_store : ratings_store) << cells
+      store_for(range) << cells
       [200, nil]
     end
 

@@ -1,7 +1,7 @@
 # CFP Review App
 
 PicoRubyKaigi 2026 Assemble のプロポーザルレビューに使う [Funicular](https://github.com/picoruby/funicular)（PicoRuby.wasm） 製の静的アプリです。  
-データソースは Google フォームで、応募受付ほか採否の決定、登壇者への通知、タイムテーブル機能はありません。
+データソースは Google フォームで、応募受付ほか登壇者への通知、タイムテーブル機能はありません。
 
 
 ## レビュアーの使い方
@@ -14,6 +14,9 @@ PicoRubyKaigi 2026 Assemble のプロポーザルレビューに使う [Funicula
 自分のプロポーザルも一覧に出ますが、採点はできません。ほかの人の点数は見えますが、コメントは見えません。
 
 プロポーザルにはタグを付けられます。
+
+採否は一覧か詳細の Accept / Waitlist / Reject で決めます。押した時点では選考中の状態で、
+詳細の Finalize State を押すと確定します。
 
 ## ローカルで動かす
 
@@ -73,7 +76,30 @@ C列は回答シートの行番号です。
 
 アプリは行の追記のみ行います。対象行ごとに一番下の行がいまのタグです。
 
-### テスト投稿の除外
+### States タブ
+
+回答シートに `States` という名前のタブを作ります。
+
+| 列 | 内容 | 例 |
+|---|---|---|
+| A | タイムスタンプ | `2026-09-01T03:20:11.123Z` |
+| B | 採択者 | `reviewer@example.com` |
+| C | 対象行 | `5` |
+| D | 状態 | `soft accepted` |
+
+アプリは行の追記のみ行います。対象行ごとに一番下の行がいまの状態です。
+
+| 状態 | 意味 |
+| --- | --- |
+| `submitted` | 未選考 |
+| `soft accepted` | 選考中の採択 |
+| `soft waitlisted` | 選考中の補欠 |
+| `soft rejected` | 選考中の不採択 |
+| `accepted` | 確定した採択 |
+| `waitlisted` | 確定した補欠 |
+| `rejected` | 確定した不採択。画面には not accepted と出る |
+
+## テスト投稿の除外
 
 `proposals.rb` の `TEST_ROWS` に行番号を書くと、テスト行を除外できます。
 

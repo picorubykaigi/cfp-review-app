@@ -6,15 +6,18 @@ class ReviewApp < Funicular::Component
   include Index
   include Show
   include TagsView
+  include StatesView
 
   RANGE   = 'A2:L'
   RATINGS = 'Ratings!A2:E'
   TAGS    = 'Tags!A2:D'
+  STATES  = 'States!A2:D'
 
   def initialize_state
     @proposals = Proposals.new([])
     @ratings = Ratings.new([], '')
     @tags = Tags.new([])
+    @states = States.new([])
     @session = Session.new
     location_hash = JS.global[:location][:hash].to_s
     @config = SheetConfig.read(local_storage, Permalink.sheet_id(location_hash))
@@ -95,6 +98,7 @@ class ReviewApp < Funicular::Component
     @proposals = Proposals.build(SheetsClient.to_rows(body[:values]))
     load_ratings
     load_tags
+    load_states
     patch(phase: 'list', busy: false, index: 0)
     follow_permalink
   end
@@ -113,8 +117,15 @@ class ReviewApp < Funicular::Component
     @tags = Tags.new(rows)
   end
 
+  # タブが無ければ 400 が返り、その場合は全件 submitted として進む。
+  def load_states
+    status, body = SheetsClient.get_values(@session.token, @config.sheet_id, STATES)
+    rows = status == 200 ? SheetsClient.to_rows(body[:values]) : []
+    @states = States.new(rows)
+  end
+
   def fail_with(message) = patch(phase: 'error', busy: false, message: message)
-  def visible_proposals = @table.apply(@proposals, @ratings, @tags)
+  def visible_proposals = @table.apply(@proposals, @ratings, @tags, @states)
   def current = visible_proposals[state.index]
   def own?(proposal) = proposal.submitted_by?(@session.email)
 
@@ -145,6 +156,13 @@ class ReviewApp < Funicular::Component
 
   def on_filter_tag(*_a)
     @table.tag = input_value('.f-tag')
+    redraw_table
+  end
+
+  def open_mail(*_event) = patch(phase: 'mail', toast: '')
+
+  def on_filter_state(*_event)
+    @table.state = input_value('.f-state')
     redraw_table
   end
 
@@ -201,6 +219,28 @@ class ReviewApp < Funicular::Component
       flash('保存しました')
     else
       hint = status == 400 ? '「Ratings」タブが無いかもしれません。' : ''
+      flash("保存に失敗 (#{status}) #{hint}#{SheetsClient.error_message(body)}")
+    end
+  end
+
+  def set_state(row, new_state) = guard('保存') { do_set_state(row, new_state) }
+
+  def do_set_state(row, new_state)
+    return if state.busy
+
+    patch(busy: true, toast: '')
+    status, body = SheetsClient.append(
+      @session.token, @config.sheet_id, STATES,
+      [JS.global.cfpNow.to_s, @session.email, row.to_s, new_state]
+    )
+    patch(busy: false)
+
+    if status == 200
+      @states.record(row, new_state)
+      keep_index(row)
+      flash("#{@states.label(row)} にしました")
+    else
+      hint = status == 400 ? '「States」タブが無いかもしれません。' : ''
       flash("保存に失敗 (#{status}) #{hint}#{SheetsClient.error_message(body)}")
     end
   end
@@ -337,6 +377,11 @@ class ReviewApp < Funicular::Component
     JS.global.setTimeout(2600) { patch(toast: '') }
   end
 
+  def render_mail
+    component(Mail, preserve: true, proposals: @proposals, states: @states,
+              on_back: -> { back_to_list }, on_flash: ->(message) { flash(message) })
+  end
+
   def render
     div(class: 'app') do
       case state.phase
@@ -347,6 +392,7 @@ class ReviewApp < Funicular::Component
       when 'error'   then render_error
       when 'list'    then render_list
       when 'detail'  then render_detail
+      when 'mail'    then render_mail
       end
       div(class: state.toast.empty? ? 'toast' : 'toast on') { state.toast }
     end

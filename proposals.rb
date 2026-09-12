@@ -41,14 +41,20 @@ class Proposals
     Proposals.new(@list.select { |proposal| matches?(tags.text(proposal.row), query) })
   end
 
-  def sorted(key, desc, ratings, tags)
+  def in_state(value, states)
+    return self if value.empty?
+
+    Proposals.new(@list.select { |proposal| states.of(proposal.row) == value })
+  end
+
+  def sorted(key, desc, ratings, tags, states)
     Proposals.new(@list.sort do |left, right|
-      order = compare(left, right, key, desc, ratings, tags)
+      order = compare(left, right, key, desc, ratings, tags, states)
       order == 0 ? (left.row <=> right.row) : order
     end)
   end
 
-  def compare(left, right, key, desc, ratings, tags)
+  def compare(left, right, key, desc, ratings, tags, states)
     case key
     when 'ratings'
       compare_count(left, right, desc, ratings)
@@ -64,6 +70,8 @@ class Proposals
       flip(left.format_label <=> right.format_label, desc)
     when 'tags'
       flip(tags.text(left.row) <=> tags.text(right.row), desc)
+    when 'state'
+      flip(states.order(left.row) <=> states.order(right.row), desc)
     else # score, reset
       compare_visible(left, right, desc, ratings) do
         ratings.average(left.row) <=> ratings.average(right.row)

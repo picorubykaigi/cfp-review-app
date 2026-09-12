@@ -20,6 +20,7 @@ module Show
 
       div(class: 'page-header') do
         h1(class: 'proposal-title') { proposal.title }
+        render_state_header(proposal)
       end
 
       div(class: 'proposal-info-bar') do
