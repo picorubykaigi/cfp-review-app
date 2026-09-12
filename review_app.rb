@@ -7,6 +7,7 @@ class ReviewApp < Funicular::Component
   include Show
   include TagsView
   include StatesView
+  include MailView
 
   RANGE   = 'A2:L'
   RATINGS = 'Ratings!A2:E'
@@ -18,6 +19,7 @@ class ReviewApp < Funicular::Component
     @ratings = Ratings.new([], '')
     @tags = Tags.new([])
     @states = States.new([])
+    @mail_texts = {}
     @session = Session.new
     location_hash = JS.global[:location][:hash].to_s
     @config = SheetConfig.read(local_storage, Permalink.sheet_id(location_hash))
@@ -25,7 +27,7 @@ class ReviewApp < Funicular::Component
     {
       phase: 'signin', message: '', index: 0, editing: '',
       score: '', busy: false, toast: '', table_revision: 0, tag_edit: 0,
-      prism_ready: false,
+      prism_ready: false, mail_state: States::ACCEPTED, mail_row: 0,
     }
   end
 
@@ -157,6 +159,46 @@ class ReviewApp < Funicular::Component
   def on_filter_tag(*_a)
     @table.tag = input_value('.f-tag')
     redraw_table
+  end
+
+  def open_mail(*_event)
+    guard('テンプレート読込み') do
+      load_mail_texts
+      patch(phase: 'mail', toast: '', mail_row: 0)
+    end
+  end
+
+  def load_mail_texts
+    MailTemplate::PATHS.each do |mail_state, path|
+      @mail_texts[mail_state] = read_text(path) if @mail_texts[mail_state].nil?
+    end
+  end
+
+  def read_text(path)
+    out = ''
+    JS.global.fetch(path) do |response|
+      out = response.text.await.to_s if response[:status].to_s.to_i == 200
+    end
+    out
+  end
+
+  def on_mail_state(*_event) = patch(mail_state: input_value('.mail-state'), mail_row: 0)
+  def preview_mail(row) = patch(mail_row: row)
+  def mail_proposals = @proposals.in_state(state.mail_state, @states)
+  def mail_for(proposal) = MailTemplate.new(mail_text, proposal)
+  def mail_text = @mail_texts[state.mail_state].to_s
+
+  def previewed
+    found = nil
+    mail_proposals.each { |proposal| found = proposal if proposal.row == state.mail_row }
+    found
+  end
+
+  def copy(label, text)
+    guard('コピー') do
+      JS.global[:navigator][:clipboard].writeText(text)
+      flash("#{label}をコピーしました")
+    end
   end
 
   def on_filter_state(*_event)
@@ -385,6 +427,7 @@ class ReviewApp < Funicular::Component
       when 'error'   then render_error
       when 'list'    then render_list
       when 'detail'  then render_detail
+      when 'mail'    then render_mail
       end
       div(class: state.toast.empty? ? 'toast' : 'toast on') { state.toast }
     end

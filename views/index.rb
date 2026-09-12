@@ -6,6 +6,7 @@ module Index
         div(class: 'bar-title') { 'CFP Review App' }
         div(class: 'bar-sub') { "#{rows.size} proposals" }
         button(class: 'btn btn-default btn-sm', onclick: :reset_sort) { 'Reset Sort' }
+        button(class: 'btn btn-default btn-sm', onclick: :open_mail) { 'Mail' }
       end
       div(class: 'table-scroll') do
         table(class: 'datatable proposal-list') do

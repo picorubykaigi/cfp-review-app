@@ -212,6 +212,7 @@ h1, h2, h3 { margin-top: 20px; margin-bottom: 10px; font-weight: 600; }
 
 .list-wrap { max-width: 80rem; margin: 0 auto; padding: 0 1.25rem 5rem; }
 .detail-wrap { max-width: 48rem; margin: 0 auto; padding: 0 1.25rem 5rem; }
+.mail-wrap { max-width: 72rem; margin: 0 auto; padding: 0 1.25rem 5rem; }
 
 .bar {
   display: flex;
@@ -279,6 +280,7 @@ td.c-speaker { white-space: nowrap; }
 td.c-format { white-space: nowrap; font-size: var(--font-size-small); color: var(--gray); }
 td.c-tags { text-align: left; min-width: 8rem; }
 td.c-status { white-space: nowrap; }
+td.c-email { white-space: nowrap; text-align: left; }
 td.c-actions { white-space: nowrap; cursor: default; }
 td.c-actions .state-buttons { flex-wrap: nowrap; }
 
@@ -301,6 +303,29 @@ td.c-actions .state-buttons { flex-wrap: nowrap; }
 .info-item-value .btn-icon { margin-left: .4rem; vertical-align: baseline; }
 .state-buttons { display: inline-flex; flex-wrap: wrap; gap: .35rem; }
 .state-header { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+
+.mail-field { margin-top: 1rem; }
+.mail-field .info-item-heading { margin-bottom: .25rem; }
+.mail-none { margin-top: 1.5rem; color: var(--gray); }
+
+.mail-state {
+  font: inherit;
+  font-size: var(--font-size-small);
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius-base);
+}
+
+.mail-preview { margin-top: 1.5rem; }
+.mail-subject { font-weight: 700; margin: .25rem 0 .5rem; }
+
+.mail-text {
+  white-space: pre-wrap;
+  background: var(--beige);
+  border: 1px solid var(--legend-border-color);
+  border-radius: var(--border-radius-base);
+  padding: 1rem;
+}
 
 
 .page-header {
