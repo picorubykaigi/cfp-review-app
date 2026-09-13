@@ -20,17 +20,38 @@ class MailTemplate
   def body = body_lines.join("\n")
 
   def body_lines
-    @lines[BODY_INDEX, @lines.size].map { |line| keep(line) }.compact
+    out = []
+    open_format = nil
+    @lines[BODY_INDEX, @lines.size].each do |line|
+      if open_format.nil?
+        open_format = take(line, out)
+      else
+        open_format = continue(line, out, open_format)
+      end
+    end
+    out
   end
 
   # `{Talk:}``{Showcase:}` で始まる行は対象発表スタイルのときだけ前置きを外して残す
-  def keep(line)
-    format = FORMATS.find { |format| line.start_with?("{#{format}:}") }
+  # 複数行のときは `{Showcase:` で始まり、最後の行が `}` で終わる
+  def take(line, out)
+    format = FORMATS.find { |name| line.start_with?("{#{name}:") }
     if format.nil?
-      fill(line)
-    elsif format == @proposal.format_label
-      fill(line.delete_prefix("{#{format}:}"))
+      out << fill(line)
+      nil
+    elsif line.start_with?("{#{format}:}")
+      out << fill(line.delete_prefix("{#{format}:}")) if format == @proposal.format_label
+      nil
+    else
+      format
     end
+  end
+
+  def continue(line, out, format)
+    closing = line.end_with?('}')
+    body = closing ? line[0, line.size - 1] : line
+    out << fill(body) if format == @proposal.format_label
+    closing ? nil : format
   end
 
   def fill(line)
