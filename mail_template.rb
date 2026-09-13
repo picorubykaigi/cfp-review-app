@@ -1,28 +1,21 @@
 class MailTemplate
   STATES = [States::ACCEPTED, States::REJECTED].freeze
-  PATHS = {
-    States::ACCEPTED => 'mails/accepted.txt',
-    States::REJECTED => 'mails/not_accepted.txt'
-  }.freeze
-  BODY_INDEX = 2
   FORMATS = %w[Talk Showcase].freeze
 
-  # textは以下の形式:
-  #   1行目: 件名
-  #   3行目以降: 本文
-  def initialize(text, proposal)
-    @lines = text.split("\n")
+  def initialize(subject, body, proposal)
+    @subject = subject
+    @lines = body.split("\n")
     @proposal = proposal
   end
 
-  def subject = @lines[0].to_s
+  def subject = fill(@subject)
 
   def body = body_lines.join("\n")
 
   def body_lines
     out = []
     open_format = nil
-    @lines[BODY_INDEX, @lines.size].each do |line|
+    @lines.each do |line|
       if open_format.nil?
         open_format = take(line, out)
       else

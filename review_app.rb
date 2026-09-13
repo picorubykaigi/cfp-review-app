@@ -12,12 +12,14 @@ class ReviewApp < Funicular::Component
   RATINGS = 'Ratings!A2:E'
   TAGS    = 'Tags!A2:D'
   STATES  = 'States!A2:D'
+  MAILS   = 'Mails!A2:C'
 
   def initialize_state
     @proposals = Proposals.new([])
     @ratings = Ratings.new([], '')
     @tags = Tags.new([])
     @states = States.new([])
+    @mails = MailTexts.new([])
     @session = Session.new
     location_hash = JS.global[:location][:hash].to_s
     @config = SheetConfig.read(local_storage, Permalink.sheet_id(location_hash))
@@ -159,7 +161,19 @@ class ReviewApp < Funicular::Component
     redraw_table
   end
 
-  def open_mail(*_event) = patch(phase: 'mail', toast: '')
+  def open_mail(*_event)
+    guard('文面の読み込み') do
+      load_mails
+      patch(phase: 'mail', toast: '')
+    end
+  end
+
+  # タブが無ければ 400 が返り、その場合は文面なしとして進む。
+  def load_mails
+    status, body = SheetsClient.get_values(@session.token, @config.sheet_id, MAILS)
+    rows = status == 200 ? SheetsClient.to_rows(body[:values]) : []
+    @mails = MailTexts.new(rows)
+  end
 
   def on_filter_state(*_event)
     @table.state = input_value('.f-state')
@@ -378,7 +392,7 @@ class ReviewApp < Funicular::Component
   end
 
   def render_mail
-    component(Mail, preserve: true, proposals: @proposals, states: @states,
+    component(Mail, preserve: true, proposals: @proposals, states: @states, mails: @mails,
               on_back: -> { back_to_list }, on_flash: ->(message) { flash(message) })
   end
 

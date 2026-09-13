@@ -1,7 +1,7 @@
 # CFP Review App
 
 PicoRubyKaigi 2026 Assemble のプロポーザルレビューに使う [Funicular](https://github.com/picoruby/funicular)（PicoRuby.wasm） 製の静的アプリです。  
-データソースは Google フォームで、応募受付ほか登壇者への通知、タイムテーブル機能はありません。
+データソースは Google フォームで、応募受付ほかメールの送信、タイムテーブル機能はありません。
 
 
 ## レビュアーの使い方
@@ -99,9 +99,27 @@ C列は回答シートの行番号です。
 | `waitlisted` | 確定した補欠 |
 | `rejected` | 確定した不採択。画面には not accepted と出る |
 
-## テスト投稿の除外
+### Mails タブ
 
-`proposals.rb` の `TEST_ROWS` に行番号を書くと、テスト行を除外できます。
+回答シートに `Mails` という名前のタブを作ります。メールの文面をここに置きます。
+
+| 列 | 内容 | 値 |
+|---|---|---|
+| A | 状態 | `accepted` `rejected`|
+| B | 件名 | |
+| C | 本文 | |
+
+#### 変数
+
+- `{Title:}`
+- `{Talk or Showcase:}`
+
+#### 条件付きの行
+
+書いた発表スタイルと一致するプロポーザルにだけ残ります。
+
+- `{Talk:}` `{Showcase:}`: 1行
+- `{Talk:` `{Showcase:` 〜 `}`: 複数行
 
 ## 公開する
 

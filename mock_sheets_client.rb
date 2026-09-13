@@ -85,11 +85,31 @@ module SheetsClient
       ]
     end
 
+    def mails_store
+      $mock_mails ||= [
+        ['accepted', 'テスト用の件名（採択）',
+         "テスト用の本文です。\n" \
+         "タイトル: {Title:}\n" \
+         "発表スタイル: {Talk or Showcase:}\n" \
+         "\n" \
+         "{Talk:}Talk のときだけ出る行。\n" \
+         '{Showcase:}Showcase のときだけ出る行。'],
+        ['rejected', 'テスト用の件名（不採択）',
+         "テスト用の本文です。\n" \
+         "タイトル: {Title:}\n" \
+         "\n" \
+         "{Showcase:\n" \
+         "複数行のブロック。\n" \
+         '2行目。Showcase のときだけ残る。}']
+      ]
+    end
+
     def store_for(range)
       case range
       when 'Ratings!A2:E' then ratings_store
       when 'Tags!A2:D'    then tags_store
       when 'States!A2:D'  then states_store
+      when 'Mails!A2:C'   then mails_store
       else FAKE
       end
     end

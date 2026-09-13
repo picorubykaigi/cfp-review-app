@@ -1,24 +1,21 @@
 class MailTexts
-  def initialize
-    @texts = {}
-  end
-
-  def load
-    MailTemplate::PATHS.each do |status, path|
-      @texts[status] = read(path) if @texts[status].nil?
+  # 列: A 状態 / B 件名 / C 本文
+  def initialize(rows)
+    @by_status = {}
+    rows.each do |row|
+      status = row[0].to_s
+      @by_status[status] = [row[1].to_s, row[2].to_s] unless status.empty?
     end
   end
 
-  def of(status) = @texts[status].to_s
-  def exists?(status) = !of(status).empty?
+  def subject_of(status) = of(status)[0]
+  def body_of(status) = of(status)[1]
+  def exists?(status) = !body_of(status).empty?
 
   private
 
-  def read(path)
-    out = ''
-    JS.global.fetch(path, { 'cache' => 'no-store' }) do |response|
-      out = response.text.await.to_s if response[:status].to_s.to_i == 200
-    end
-    out
+  def of(status)
+    found = @by_status[status]
+    found.nil? ? ['', ''] : found
   end
 end

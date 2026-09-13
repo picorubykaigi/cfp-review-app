@@ -1,11 +1,9 @@
 class Mail < Funicular::Component
   def initialize_state
-    @texts = MailTexts.new
     { status: States::ACCEPTED, preview_row: 0 }
   end
 
   def render
-    @texts.load
     div(class: 'mail-wrap') do
       render_header
       render_picker
@@ -17,8 +15,12 @@ class Mail < Funicular::Component
 
   def proposals = props[:proposals]
   def states = props[:states]
+  def mails = props[:mails]
   def recipients = proposals.in_state(state.status, states)
-  def mail_for(proposal) = MailTemplate.new(@texts.of(state.status), proposal)
+
+  def mail_for(proposal)
+    MailTemplate.new(mails.subject_of(state.status), mails.body_of(state.status), proposal)
+  end
 
   def previewed
     found = nil
@@ -58,7 +60,7 @@ class Mail < Funicular::Component
   end
 
   def render_body
-    if @texts.exists?(state.status)
+    if mails.exists?(state.status)
       render_recipients
     else
       render_missing_template
@@ -66,8 +68,9 @@ class Mail < Funicular::Component
   end
 
   def render_missing_template
-    path = MailTemplate::PATHS[state.status]
-    div(class: 'mail-none') { "#{path} がありません。#{path}.sample をコピーしてください。" }
+    div(class: 'mail-none') do
+      "Mails タブに #{States.label_of(state.status)} の行がありません。"
+    end
   end
 
   def render_recipients
