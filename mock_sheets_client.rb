@@ -87,14 +87,14 @@ module SheetsClient
 
     def mails_store
       $mock_mails ||= [
-        ['accepted', 'テスト用の件名（採択）',
+        ['テンプレートA', 'テスト用の件名A',
          "テスト用の本文です。\n" \
          "タイトル: {Title:}\n" \
          "発表スタイル: {Talk or Showcase:}\n" \
          "\n" \
          "{Talk:}Talk のときだけ出る行。\n" \
          '{Showcase:}Showcase のときだけ出る行。'],
-        ['rejected', 'テスト用の件名（不採択）',
+        ['テンプレートB', 'テスト用の件名B',
          "テスト用の本文です。\n" \
          "タイトル: {Title:}\n" \
          "\n" \
