@@ -1,6 +1,6 @@
 class Mail < Funicular::Component
   def initialize_state
-    { status: States::ACCEPTED, preview_row: 0 }
+    { template: '', status: States::ACCEPTED, preview_row: 0 }
   end
 
   def render
@@ -18,14 +18,23 @@ class Mail < Funicular::Component
   def mails = props[:mails]
   def recipients = proposals.in_state(state.status, states)
 
+  def template
+    mails.names.include?(state.template) ? state.template : mails.names.first
+  end
+
   def mail_for(proposal)
-    MailTemplate.new(mails.subject_of(state.status), mails.body_of(state.status), proposal)
+    MailTemplate.new(mails.subject_of(template), mails.body_of(template), proposal)
   end
 
   def previewed
     found = nil
     recipients.each { |proposal| found = proposal if proposal.row == state.preview_row }
     found
+  end
+
+  def on_template(*_event)
+    element = JS.document.querySelector('.mail-template')
+    patch(template: element.nil? ? template : element[:value].to_s)
   end
 
   def on_status(*_event)
@@ -50,26 +59,35 @@ class Mail < Funicular::Component
   end
 
   def render_picker
-    div(class: 'mail-field') do
-      div(class: 'info-item-heading') { 'Status' }
-      select(class: 'mail-state', onchange: :on_status) do
-        MailTemplate::STATES.each { |value| option(value: value) { States.label_of(value) } }
-        ''
+    div(class: 'mail-pickers') do
+      div(class: 'mail-field') do
+        div(class: 'info-item-heading') { 'Template' }
+        select(class: 'mail-select mail-template', onchange: :on_template) do
+          mails.names.each { |name| option(value: name) { name } }
+          ''
+        end
+      end
+      div(class: 'mail-field') do
+        div(class: 'info-item-heading') { 'Status' }
+        select(class: 'mail-select mail-state', onchange: :on_status) do
+          MailTemplate::STATES.each { |value| option(value: value) { States.label_of(value) } }
+          ''
+        end
       end
     end
   end
 
   def render_body
-    if mails.exists?(state.status)
-      render_recipients
-    else
+    if mails.empty?
       render_missing_template
+    else
+      render_recipients
     end
   end
 
   def render_missing_template
     div(class: 'mail-none') do
-      "Mails タブに #{States.label_of(state.status)} の行がありません。"
+      'Mails タブにテンプレートがありません。'
     end
   end
 
