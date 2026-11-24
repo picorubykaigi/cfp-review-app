@@ -9,11 +9,11 @@ module Show
         button(class: 'btn btn-primary btn-sm', onclick: :back_to_list) do
           '« Return to Proposals'
         end
-        div(class: 'bar-sub') { "#{state.index + 1} / #{total}" }
-        button(class: 'btn btn-default btn-sm', onclick: ->(*_a) { show_at(state.index - 1) }) do
+        div(class: 'bar-sub') { "#{state[:index] + 1} / #{total}" }
+        button(class: 'btn btn-default btn-sm', onclick: ->(*_a) { show_at(state[:index] - 1) }) do
           'Previous Proposal'
         end
-        button(class: 'btn btn-primary btn-sm', onclick: ->(*_a) { show_at(state.index + 1) }) do
+        button(class: 'btn btn-primary btn-sm', onclick: ->(*_a) { show_at(state[:index] + 1) }) do
           'Next Proposal'
         end
       end
@@ -71,7 +71,7 @@ module Show
       textarea(class: 'rate-comment', placeholder: 'Comment (optional)') { '' }
       div(class: 'rate-foot') do
         button(class: 'btn btn-primary', onclick: :save_rating) do
-          state.busy ? 'Saving…' : 'Save'
+          state[:busy] ? 'Saving…' : 'Save'
         end
         div(class: 'rate-note') do
           @ratings.rated?(proposal.row) ? 'Saving again replaces your rating.' : ''

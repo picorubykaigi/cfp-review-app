@@ -6,7 +6,7 @@ module TagsView
   def render_tag_item(proposal)
     div(class: 'proposal-meta-item tag-item') do
       div(class: 'info-item-heading') { 'Reviewer Tags' }
-      if state.tag_edit == proposal.row
+      if state[:tag_edit] == proposal.row
         render_tag_editor(proposal)
       else
         render_tag_view(proposal)

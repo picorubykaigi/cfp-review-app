@@ -46,7 +46,7 @@ class ReviewApp < Funicular::Component
   # 再描画は入力中の値を保持する（＝提案を切り替えても前のコメントが残る）。
   # 描画後に呼ばれるフックで、表示対象が変わったときのみ textarea の中身を入れ替える。
   def component_updated(*_a)
-    return unless state.phase == 'detail'
+    return unless state[:phase] == 'detail'
 
     proposal = current
     return if proposal.nil?
@@ -63,7 +63,7 @@ class ReviewApp < Funicular::Component
   end
 
   def sign_in(*_a)
-    return if state.busy
+    return if state[:busy]
 
     patch(busy: true, message: '')
     JS.global.cfpSignIn do |token|
@@ -128,7 +128,7 @@ class ReviewApp < Funicular::Component
 
   def fail_with(message) = patch(phase: 'error', busy: false, message: message)
   def visible_proposals = @table.apply(@proposals, @ratings, @tags, @states)
-  def current = visible_proposals[state.index]
+  def current = visible_proposals[state[:index]]
   def own?(proposal) = proposal.submitted_by?(@session.email)
 
   def sort_by_column(key)
@@ -181,7 +181,7 @@ class ReviewApp < Funicular::Component
   end
 
   # 値は TableState が持ち、state で再描画する
-  def redraw_table = patch(table_revision: state.table_revision + 1)
+  def redraw_table = patch(table_revision: state[:table_revision] + 1)
 
   def input_value(selector)
     element = JS.document.querySelector(selector)
@@ -196,7 +196,7 @@ class ReviewApp < Funicular::Component
   def edit_sheet(sheet_id) = patch(editing: sheet_id)
 
   def save_sheet_name(sheet_id)
-    return unless state.editing == sheet_id
+    return unless state[:editing] == sheet_id
 
     @config.rename(sheet_id, input_value("#sheet-name-#{sheet_id}"))
     patch(editing: '')
@@ -204,7 +204,7 @@ class ReviewApp < Funicular::Component
 
   def remove_sheet(sheet_id)
     @config.remove(sheet_id)
-    patch(phase: @config.missing? ? 'nosheet' : state.phase, editing: '', message: '')
+    patch(phase: @config.missing? ? 'nosheet' : state[:phase], editing: '', message: '')
   end
 
   def on_score_input(*_a) = patch(score: score_value)
@@ -212,9 +212,9 @@ class ReviewApp < Funicular::Component
 
   def do_save_rating
     proposal = current
-    return if proposal.nil? || state.busy
+    return if proposal.nil? || state[:busy]
 
-    score = state.score.to_s.to_f
+    score = state[:score].to_s.to_f
     if score < 1 || score > 5
       flash('Rating must be between 1 and 5.')
       return
@@ -240,7 +240,7 @@ class ReviewApp < Funicular::Component
   def set_state(row, new_state) = guard('保存') { do_set_state(row, new_state) }
 
   def do_set_state(row, new_state)
-    return if state.busy
+    return if state[:busy]
 
     patch(busy: true, toast: '')
     status, body = SheetsClient.append(
@@ -277,7 +277,7 @@ class ReviewApp < Funicular::Component
 
   def do_save_tags
     proposal = current
-    return if proposal.nil? || state.busy
+    return if proposal.nil? || state[:busy]
 
     list = @tags.parse(tag_value.downcase)
 
@@ -338,7 +338,7 @@ class ReviewApp < Funicular::Component
   end
 
   def on_hashchange(*_a)
-    return if state.phase != 'list' && state.phase != 'detail'
+    return if state[:phase] != 'list' && state[:phase] != 'detail'
 
     guard('表示') { follow_permalink }
   end
@@ -398,7 +398,7 @@ class ReviewApp < Funicular::Component
 
   def render
     div(class: 'app') do
-      case state.phase
+      case state[:phase]
       when 'setup'   then render_setup
       when 'nosheet' then render_nosheet
       when 'signin'  then render_signin
@@ -408,7 +408,7 @@ class ReviewApp < Funicular::Component
       when 'detail'  then render_detail
       when 'mail'    then render_mail
       end
-      div(class: state.toast.empty? ? 'toast' : 'toast on') { state.toast }
+      div(class: state[:toast].empty? ? 'toast' : 'toast on') { state[:toast] }
     end
   end
 end

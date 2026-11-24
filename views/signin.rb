@@ -16,9 +16,9 @@ module Signin
       end
       render_sheet_picker
       button(class: 'btn btn-primary', onclick: :sign_in) do
-        state.busy ? 'サインイン中…' : 'Google でサインイン'
+        state[:busy] ? 'サインイン中…' : 'Google でサインイン'
       end
-      div(class: 'err') { state.message }
+      div(class: 'err') { state[:message] }
     end
   end
 
@@ -33,7 +33,7 @@ module Signin
   end
 
   def render_sheet_row(sheet_id)
-    editing = state.editing == sheet_id
+    editing = state[:editing] == sheet_id
     div(class: 'sheet-row') do
       input(type: 'radio', name: 'cfp-sheet', class: 'sheet-pick',
             checked: @config.selected?(sheet_id),
@@ -93,7 +93,7 @@ module Signin
   def render_error
     div(class: 'gate') do
       h2 { '読み込めませんでした' }
-      div(class: 'err') { state.message }
+      div(class: 'err') { state[:message] }
       render_sheet_picker
       button(class: 'btn btn-primary', onclick: :sign_in) { 'やり直す' }
     end
