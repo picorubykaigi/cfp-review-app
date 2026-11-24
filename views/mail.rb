@@ -16,10 +16,10 @@ class Mail < Funicular::Component
   def proposals = props[:proposals]
   def states = props[:states]
   def mails = props[:mails]
-  def recipients = proposals.in_state(state.status, states)
+  def recipients = proposals.in_state(state[:status], states)
 
   def template
-    mails.names.include?(state.template) ? state.template : mails.names.first
+    mails.names.include?(state[:template]) ? state[:template] : mails.names.first
   end
 
   def mail_for(proposal)
@@ -28,7 +28,7 @@ class Mail < Funicular::Component
 
   def previewed
     found = nil
-    recipients.each { |proposal| found = proposal if proposal.row == state.preview_row }
+    recipients.each { |proposal| found = proposal if proposal.row == state[:preview_row] }
     found
   end
 
@@ -39,7 +39,7 @@ class Mail < Funicular::Component
 
   def on_status(*_event)
     element = JS.document.querySelector('.mail-state')
-    patch(status: element.nil? ? state.status : element[:value].to_s, preview_row: 0)
+    patch(status: element.nil? ? state[:status] : element[:value].to_s, preview_row: 0)
   end
 
   def copy(label, body)
@@ -122,7 +122,7 @@ class Mail < Funicular::Component
 
   def render_row(proposal)
     open = ->(*_event) { patch(preview_row: proposal.row) }
-    tr(class: state.preview_row == proposal.row ? 'proposal sel' : 'proposal') do
+    tr(class: state[:preview_row] == proposal.row ? 'proposal sel' : 'proposal') do
       td(class: 'c-speaker', onclick: open) { proposal.name }
       td(class: 'c-title', onclick: open) { proposal.title }
       td(class: 'c-format', onclick: open) { proposal.format_label }
